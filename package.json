@@ -1,0 +1,28 @@
+{
+  "name": "currency-converter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "fetch-rates": "node scripts/fetch-rates.js",
+    "test-fetch": "FORCE_UPDATE=true node scripts/fetch-rates.js",
+    "generate-summary": "node scripts/generate-summary.js",
+    "update-cache": "node scripts/update-cache-timestamp.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0",
+    "vite-plugin-solid": "^2.7.2"
+  },
+  "dependencies": {
+    "solid-js": "^1.8.5",
+    "node-fetch": "^2.7.0"
+  }
+}

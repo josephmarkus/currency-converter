@@ -1,0 +1,66 @@
+name: Fetch Daily Exchange Rates
+
+on:
+  schedule:
+    # Run daily at 9:00 AM UTC (after ECB updates)
+    - cron: "0 9 * * *"
+  workflow_dispatch: # Allow manual triggering
+    inputs:
+      force_update:
+        description: "Force update even if data exists for today"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  fetch-rates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch and upload exchange rates
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
+          FORCE_UPDATE: ${{ github.event.inputs.force_update }}
+        run: node scripts/fetch-rates.js
+
+      - name: Update cache timestamp
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
+        run: node scripts/update-cache-timestamp.js
+
+      - name: Generate rate summary
+        run: node scripts/generate-summary.js
+
+      - name: Commit rate summary (if exists)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update exchange rate summary for ${{ steps.date.outputs.date }}"
+          file_pattern: "data/rate-summary.json"
+        if: hashFiles('data/rate-summary.json') != ''
+
+      - name: Post to Slack (on failure)
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":"🚨 Currency rate fetch failed for $(date +%Y-%m-%d)"}' \
+              $SLACK_WEBHOOK_URL
+          fi

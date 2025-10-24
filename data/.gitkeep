@@ -1,0 +1,6 @@
+# Placeholder file to ensure the data directory is tracked in git
+# This directory will contain generated summaries and status files
+
+# Generated files (do not edit manually):
+# - rate-summary.json (exchange rate statistics)
+# - status.json (simple status for monitoring)

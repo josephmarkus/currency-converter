@@ -1,0 +1,22 @@
+name = "currency-converter-worker"
+main = "worker.js"
+compatibility_date = "2023-10-01"
+
+[env.production]
+name = "currency-converter-worker"
+
+[env.staging]
+name = "currency-converter-worker-staging"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "currency-converter-db"
+database_id = "your-database-id-here"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "currency-converter-db-staging"
+database_id = "your-staging-database-id-here"
+
+[vars]
+ENVIRONMENT = "production"
