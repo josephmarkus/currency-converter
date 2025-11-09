@@ -3,7 +3,7 @@
  * This helps the frontend know when to show the "new data available" indicator
  */
 
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 const CLOUDFLARE_API = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/d1/database/${process.env.CLOUDFLARE_DATABASE_ID}/query`;
 
@@ -111,6 +111,4 @@ async function main() {
   await updateCacheTimestamp();
 }
 
-if (require.main === module) {
-  main();
-}
+main();

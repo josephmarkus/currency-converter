@@ -3,7 +3,7 @@
  * This script runs daily via GitHub Actions
  */
 
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 // Configuration
 const FRANKFURTER_API = 'https://api.frankfurter.app';
@@ -265,12 +265,10 @@ function validateEnvironment() {
 }
 
 // Run the script
-if (require.main === module) {
-  validateEnvironment();
-  main().catch(error => {
-    console.error('💥 Unhandled error:', error);
-    process.exit(1);
-  });
-}
+validateEnvironment();
+main().catch(error => {
+  console.error('💥 Unhandled error:', error);
+  process.exit(1);
+});
 
-module.exports = { main, fetchAllExchangeRates, uploadToCloudflare };
+export { main, fetchAllExchangeRates, uploadToCloudflare };

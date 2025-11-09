@@ -3,15 +3,19 @@
  * Creates a JSON file with rate statistics and trends
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function generateSummary() {
   try {
     console.log('📈 Generating rate summary...');
     
     const today = new Date().toISOString().split('T')[0];
-    const dataDir = path.join(process.cwd(), 'data');
+    const dataDir = path.join(path.dirname(__dirname), 'data');
     
     // Ensure data directory exists
     try {
@@ -81,7 +85,7 @@ async function generateSummary() {
         rates_fetched: false
       };
       
-      const dataDir = path.join(process.cwd(), 'data');
+      const dataDir = path.join(path.dirname(__dirname), 'data');
       await fs.mkdir(dataDir, { recursive: true });
       await fs.writeFile(
         path.join(dataDir, 'rate-summary.json'), 
@@ -100,8 +104,6 @@ function getNextFetchTime() {
   return tomorrow.toISOString();
 }
 
-if (require.main === module) {
-  generateSummary();
-}
+generateSummary();
 
-module.exports = { generateSummary };
+export { generateSummary };
