@@ -3,7 +3,7 @@ name: Fetch Daily Exchange Rates
 on:
   schedule:
     # Run on weekdays at 9:00 AM UTC (after ECB updates)
-    - cron: "0 9 * * 1-5"  # Monday-Friday
+    - cron: "0 9 * * 1-5" # Monday-Friday
   workflow_dispatch: # Allow manual triggering
     inputs:
       force_update:
@@ -53,14 +53,3 @@ jobs:
           commit_message: "Update exchange rate summary for ${{ steps.date.outputs.date }}"
           file_pattern: "data/rate-summary.json"
         if: hashFiles('data/rate-summary.json') != ''
-
-      - name: Post to Slack (on failure)
-        if: failure()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          if [ -n "$SLACK_WEBHOOK_URL" ]; then
-            curl -X POST -H 'Content-type: application/json' \
-              --data '{"text":"🚨 Currency rate fetch failed for $(date +%Y-%m-%d)"}' \
-              $SLACK_WEBHOOK_URL
-          fi

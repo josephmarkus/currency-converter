@@ -43,8 +43,8 @@ You'll need these values for GitHub Secrets:
 
 ### Account ID
 
-1. In Cloudflare Dashboard, look at the sidebar
-2. Copy your **Account ID** (right sidebar)
+1. Run `npx wrangler whoami --account` in your terminal, or
+2. In Cloudflare Dashboard, look at the sidebar and copy your **Account ID** (right sidebar)
 
 ### Database ID
 
@@ -58,12 +58,11 @@ In your GitHub repository:
 1. Go to **Settings** → **Secrets and variables** → **Actions**
 2. Click **New repository secret** for each:
 
-| Secret Name              | Value                    | Description                  |
-| ------------------------ | ------------------------ | ---------------------------- |
-| `CLOUDFLARE_API_TOKEN`   | Your API token           | For accessing Cloudflare API |
-| `CLOUDFLARE_ACCOUNT_ID`  | Your account ID          | Your Cloudflare account      |
-| `CLOUDFLARE_DATABASE_ID` | Your database ID         | Your D1 database             |
-| `SLACK_WEBHOOK_URL`      | Slack webhook (optional) | For failure notifications    |
+| Secret Name              | Value            | Description                  |
+| ------------------------ | ---------------- | ---------------------------- |
+| `CLOUDFLARE_API_TOKEN`   | Your API token   | For accessing Cloudflare API |
+| `CLOUDFLARE_ACCOUNT_ID`  | Your account ID  | Your Cloudflare account      |
+| `CLOUDFLARE_DATABASE_ID` | Your database ID | Your D1 database             |
 
 ## 📅 Step 4: Test the Workflow
 
