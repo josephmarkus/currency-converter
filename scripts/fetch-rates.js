@@ -9,12 +9,11 @@ import fetch from 'node-fetch';
 const FRANKFURTER_API = 'https://api.frankfurter.app';
 const CLOUDFLARE_API = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/d1/database/${process.env.CLOUDFLARE_DATABASE_ID}/query`;
 
-// Major currencies to fetch (30+ currencies)
+// Major currencies supported by Frankfurter API
 const CURRENCIES = [
   'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'KRW', 'INR',
   'SGD', 'HKD', 'NOK', 'SEK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN',
-  'HRK', 'RUB', 'TRY', 'BRL', 'MXN', 'ZAR', 'THB', 'MYR', 'IDR', 'PHP',
-  'VND', 'NZD', 'ILS', 'CLP', 'COP', 'PEN', 'ARS'
+  'TRY', 'BRL', 'MXN', 'ZAR', 'THB', 'MYR', 'IDR', 'PHP', 'NZD', 'ILS'
 ];
 
 // Rate limiting configuration
