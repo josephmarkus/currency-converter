@@ -8,6 +8,62 @@ This guide explains how to set up the automated daily exchange rate fetching usi
 2. **Cloudflare Account** - Free tier is sufficient
 3. **Cloudflare D1 Database** - Serverless SQL database
 4. **Cloudflare Worker** (optional) - For API endpoints
+5. **Wrangler CLI** - For local development and database management
+
+## 💻 Local Development Setup
+
+### Install Wrangler
+
+```bash
+npm install -g wrangler
+# or use npx for one-off commands
+```
+
+### Login to Cloudflare
+
+```bash
+wrangler login
+```
+
+### Initialize Local Database
+
+Create and initialize a local D1 database for testing:
+
+```bash
+# Initialize local database with schema
+npm run db:local:init
+```
+
+This creates a local SQLite database in `.wrangler/state/v3/d1/` that mirrors your production D1 database.
+
+### Test Queries Locally
+
+```bash
+# Query the local database
+npm run db:local:query "SELECT COUNT(*) FROM exchange_rates"
+
+# Or use wrangler directly
+npx wrangler d1 execute currency-converter-db --local --command "SELECT * FROM exchange_rates LIMIT 5"
+```
+
+### Local Development Workflow
+
+1. **Initialize local database:**
+   ```bash
+   npm run db:local:init
+   ```
+
+2. **Test scripts locally** (after setting up `.env.local`):
+   ```bash
+   # Load environment variables and run against local DB
+   # Note: Scripts currently target remote Cloudflare API
+   # For full local testing, use wrangler d1 commands
+   ```
+
+3. **Verify data:**
+   ```bash
+   npm run db:local:query "SELECT COUNT(*) as total FROM exchange_rates"
+   ```
 
 ## 📋 Step 1: Create Cloudflare D1 Database
 
@@ -19,6 +75,12 @@ This guide explains how to set up the automated daily exchange rate fetching usi
 
 ### Initialize the Database Schema
 
+**Option 1: Via Wrangler CLI (Recommended)**
+```bash
+npm run db:remote:init
+```
+
+**Option 2: Via Cloudflare Dashboard**
 1. In your D1 database dashboard, click **Console**
 2. Copy and paste the SQL from `cloudflare/schema.sql`
 3. Click **Execute** to create all tables
@@ -143,6 +205,17 @@ wrangler deploy
 
 Query your D1 database:
 
+**Remote (Production):**
+```bash
+npx wrangler d1 execute currency-converter-db --remote --command "SELECT COUNT(*) FROM exchange_rates"
+```
+
+**Local (Testing):**
+```bash
+npm run db:local:query "SELECT COUNT(*) FROM exchange_rates"
+```
+
+**SQL Queries:**
 ```sql
 -- Check latest data
 SELECT date, COUNT(*) as records
@@ -194,16 +267,33 @@ npm install node-fetch
 
 ### Debug Commands
 
-**Test API locally:**
+**Test locally with local database:**
 
 ```bash
-node scripts/fetch-rates.js
+# 1. Set up local database
+npm run db:local:init
+
+# 2. Verify tables exist
+npm run db:local:query "SELECT name FROM sqlite_master WHERE type='table'"
+
+# 3. Check data
+npm run db:local:query "SELECT COUNT(*) FROM exchange_rates"
 ```
 
-**Check database:**
+**Test scripts (uses remote Cloudflare API):**
 
 ```bash
-wrangler d1 execute currency-converter-db --command "SELECT COUNT(*) FROM exchange_rates"
+# Test fetch script
+FORCE_UPDATE=true node scripts/fetch-rates.js
+
+# Initialize database
+node scripts/init-db.js
+```
+
+**Check remote database:**
+
+```bash
+npx wrangler d1 execute currency-converter-db --remote --command "SELECT COUNT(*) FROM exchange_rates"
 ```
 
 **Test worker:**
