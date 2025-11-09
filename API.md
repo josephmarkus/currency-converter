@@ -13,11 +13,13 @@ Check if the API and database are operational.
 **Endpoint:** `GET /api/health`
 
 **Example:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -36,11 +38,13 @@ Get information about the last data fetch and database status.
 **Endpoint:** `GET /api/metadata`
 
 **Example:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/metadata
 ```
 
 **Response:**
+
 ```json
 {
   "last_fetch": "2025-11-09",
@@ -62,11 +66,13 @@ Get quick status information for the frontend.
 **Endpoint:** `GET /api/status`
 
 **Example:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/status
 ```
 
 **Response:**
+
 ```json
 {
   "online": true,
@@ -87,6 +93,7 @@ Get exchange rates with various query options.
 **Endpoint:** `GET /api/rates`
 
 **Query Parameters:**
+
 - `from` (optional): Base currency code (e.g., USD)
 - `to` (optional): Target currency code (e.g., EUR)
 - `date` (optional): Date in YYYY-MM-DD format (defaults to latest)
@@ -94,11 +101,13 @@ Get exchange rates with various query options.
 #### Get All Rates for a Base Currency
 
 **Example:**
+
 ```bash
 curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=USD"
 ```
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -130,11 +139,13 @@ curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=
 #### Get Specific Currency Pair
 
 **Example:**
+
 ```bash
 curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=USD&to=EUR"
 ```
 
 **Response:**
+
 ```json
 {
   "data": {
@@ -157,11 +168,13 @@ curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=
 #### Get Summary of All Rates
 
 **Example:**
+
 ```bash
 curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates"
 ```
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -195,6 +208,7 @@ Track which currency pairs users are converting (optional analytics).
 **Endpoint:** `POST /api/user-conversion`
 
 **Request Body:**
+
 ```json
 {
   "from": "USD",
@@ -204,6 +218,7 @@ Track which currency pairs users are converting (optional analytics).
 ```
 
 **Example:**
+
 ```bash
 curl -X POST https://currency-converter-worker.josephmarkus.workers.dev/api/user-conversion \
   -H "Content-Type: application/json" \
@@ -211,6 +226,7 @@ curl -X POST https://currency-converter-worker.josephmarkus.workers.dev/api/user
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -223,6 +239,7 @@ curl -X POST https://currency-converter-worker.josephmarkus.workers.dev/api/user
 ## CORS Support
 
 All endpoints support CORS with the following headers:
+
 - `Access-Control-Allow-Origin: *`
 - `Access-Control-Allow-Methods: GET, POST, OPTIONS`
 - `Access-Control-Allow-Headers: Content-Type, Authorization`
@@ -237,6 +254,7 @@ All endpoints support CORS with the following headers:
 ## Rate Limiting
 
 Currently no rate limiting is enforced. The Cloudflare free tier supports:
+
 - 100,000 requests per day
 - Suitable for typical usage
 
@@ -253,6 +271,7 @@ All errors return JSON with the following structure:
 ```
 
 **Common HTTP Status Codes:**
+
 - `200` - Success
 - `400` - Bad Request (missing/invalid parameters)
 - `404` - Not Found
@@ -268,6 +287,7 @@ curl https://currency-converter-worker.josephmarkus.workers.dev/api/health | jq
 ```
 
 Expected output:
+
 ```json
 {
   "status": "healthy",
@@ -284,7 +304,7 @@ Expected output:
 ### JavaScript/TypeScript
 
 ```typescript
-const API_URL = 'https://currency-converter-worker.josephmarkus.workers.dev';
+const API_URL = "https://currency-converter-worker.josephmarkus.workers.dev";
 
 // Get rates for USD
 const response = await fetch(`${API_URL}/api/rates?from=USD`);
@@ -302,7 +322,7 @@ console.log(rate.rate); // 0.85
 The app is already configured to use this API via `src/config.ts`:
 
 ```typescript
-import { API_ENDPOINTS } from './config';
+import { API_ENDPOINTS } from "./config";
 
 // Automatically uses VITE_API_URL from .env or the default URL
 const response = await fetch(`${API_ENDPOINTS.rates}?from=USD`);
@@ -311,6 +331,7 @@ const response = await fetch(`${API_ENDPOINTS.rates}?from=USD`);
 ---
 
 **See also:**
+
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Full deployment guide
 - [SETUP.md](./SETUP.md) - GitHub Actions and Cloudflare setup
 - [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) - Local testing guide

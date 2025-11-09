@@ -1,5 +1,11 @@
 import { CurrencyCode, ExchangeRate, FetchMetadata } from "./types";
-import { API_ENDPOINTS, CACHE_KEY, METADATA_KEY, FRANKFURTER_API, getHeaders } from "./config";
+import {
+  API_ENDPOINTS,
+  CACHE_KEY,
+  METADATA_KEY,
+  FRANKFURTER_API,
+  getHeaders,
+} from "./config";
 
 export class CurrencyService {
   private cache: Map<string, ExchangeRate[]> = new Map();
@@ -20,10 +26,10 @@ export class CurrencyService {
       }
 
       const { data } = await response.json();
-      
+
       // Handle both array and single object responses
       const ratesArray = Array.isArray(data) ? data : [data];
-      
+
       const rates: ExchangeRate[] = ratesArray.map((item: any) => ({
         base: item.base_currency,
         target: item.target_currency,
@@ -39,7 +45,7 @@ export class CurrencyService {
       return rates;
     } catch (error) {
       console.error("Error fetching rates from worker:", error);
-      
+
       // Fallback to Frankfurter API
       try {
         console.log("Falling back to Frankfurter API...");

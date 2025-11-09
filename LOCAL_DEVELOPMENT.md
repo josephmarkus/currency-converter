@@ -71,6 +71,7 @@ npm run db:local:query "SELECT sql FROM sqlite_master WHERE type='table'"
 ### Note on Current Limitation
 
 The current scripts (`fetch-rates.js`, `init-db.js`, etc.) use the Cloudflare D1 HTTP API directly, which requires:
+
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_DATABASE_ID`
@@ -122,43 +123,47 @@ npm run db:local:query "DELETE FROM exchange_rates"
 
 ### Database Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run db:local:init` | Initialize local database with schema |
-| `npm run db:local:query "SQL"` | Run SQL query on local database |
-| `npm run db:remote:init` | Initialize remote production database |
+| Command                        | Description                           |
+| ------------------------------ | ------------------------------------- |
+| `npm run db:local:init`        | Initialize local database with schema |
+| `npm run db:local:query "SQL"` | Run SQL query on local database       |
+| `npm run db:remote:init`       | Initialize remote production database |
 
 ### Application Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run init-db` | Initialize remote database via API |
-| `npm run fetch-rates` | Fetch rates to remote database |
-| `npm run test-fetch` | Force fetch rates (bypass date check) |
+| Command               | Description                           |
+| --------------------- | ------------------------------------- |
+| `npm run dev`         | Start Vite dev server                 |
+| `npm run build`       | Build for production                  |
+| `npm run preview`     | Preview production build              |
+| `npm run init-db`     | Initialize remote database via API    |
+| `npm run fetch-rates` | Fetch rates to remote database        |
+| `npm run test-fetch`  | Force fetch rates (bypass date check) |
 
 ## 🔄 Local Development Workflow
 
 ### Typical Development Flow
 
 1. **Start with local database:**
+
    ```bash
    npm run db:local:init
    ```
 
 2. **Develop and test queries locally:**
+
    ```bash
    npm run db:local:query "SELECT COUNT(*) FROM exchange_rates"
    ```
 
 3. **Test application frontend:**
+
    ```bash
    npm run dev
    ```
 
 4. **When ready, test against remote:**
+
    ```bash
    # Create .env.local with credentials first
    npm run init-db
@@ -252,6 +257,7 @@ FORCE_UPDATE=false
 ```
 
 Load in scripts:
+
 ```bash
 # Using dotenv (if installed)
 node -r dotenv/config scripts/fetch-rates.js dotenv_config_path=.env.local

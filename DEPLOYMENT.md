@@ -7,6 +7,7 @@ This guide shows you how to deploy your Cloudflare Worker and connect your app t
 ### 1. Update wrangler.toml with your Database ID
 
 Get your database ID:
+
 ```bash
 npx wrangler d1 list
 ```
@@ -21,6 +22,7 @@ npx wrangler deploy
 ```
 
 This will deploy your worker and give you a URL like:
+
 ```
 https://currency-converter-worker.YOUR-SUBDOMAIN.workers.dev
 ```
@@ -30,11 +32,13 @@ https://currency-converter-worker.YOUR-SUBDOMAIN.workers.dev
 ### 3. Test the Worker
 
 **Health Check:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -45,11 +49,13 @@ Expected response:
 ```
 
 **Get Metadata:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/metadata
 ```
 
 Expected response:
+
 ```json
 {
   "last_fetch": "2025-11-09",
@@ -63,16 +69,19 @@ Expected response:
 ```
 
 **Get Rates for USD:**
+
 ```bash
 curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=USD"
 ```
 
 **Get Specific Rate (USD to EUR):**
+
 ```bash
 curl "https://currency-converter-worker.josephmarkus.workers.dev/api/rates?from=USD&to=EUR"
 ```
 
 **Check Status:**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/status
 ```
@@ -92,6 +101,7 @@ Add `.env` to your `.gitignore` if not already there.
 ### The App is Already Configured!
 
 The app is now configured to:
+
 1. **Primary:** Use your Cloudflare Worker API (from `VITE_API_URL` or default in `src/config.ts`)
 2. **Fallback:** Use Frankfurter API if worker is unavailable
 3. **Cache:** Use localStorage for offline support
@@ -134,18 +144,23 @@ Your app should now fetch data from your local worker, which reads from your D1 
 ### Test Each Step
 
 **Step 1: Verify data in D1**
+
 ```bash
 npx wrangler d1 execute currency-converter-db --remote --command "SELECT COUNT(*) FROM exchange_rates"
 ```
+
 Should return ~900 records.
 
 **Step 2: Verify worker serves data**
+
 ```bash
 curl "https://your-worker-url/api/rates?from=USD" | jq
 ```
+
 Should return exchange rates.
 
 **Step 3: Verify app uses worker**
+
 1. Open your app in browser
 2. Open DevTools → Network tab
 3. Make a conversion

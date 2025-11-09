@@ -10,86 +10,95 @@ export default {
 
     // CORS headers for frontend access
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-      'Access-Control-Max-Age': '86400',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+      "Access-Control-Max-Age": "86400",
     };
 
     // Handle preflight requests
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { 
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
         status: 204,
-        headers: corsHeaders 
+        headers: corsHeaders,
       });
     }
 
     // Authentication check (except for health endpoint)
-    if (path !== '/api/health') {
-      const apiKey = request.headers.get('X-API-Key');
+    if (path !== "/api/health") {
+      const apiKey = request.headers.get("X-API-Key");
       const isAuthenticated = apiKey && env.API_KEY && apiKey === env.API_KEY;
-      
+
       if (!isAuthenticated) {
-        return new Response(JSON.stringify({ 
-          error: 'Unauthorized',
-          message: 'Valid API key required'
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Unauthorized",
+            message: "Valid API key required",
+          }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
     }
 
     try {
       // Route handling
       switch (path) {
-        case '/api/rates':
+        case "/api/rates":
           return await handleGetRates(url.searchParams, env, corsHeaders);
-        
-        case '/api/metadata':
+
+        case "/api/metadata":
           return await handleGetMetadata(env, corsHeaders);
-        
-        case '/api/status':
+
+        case "/api/status":
           return await handleGetStatus(env, corsHeaders);
-        
-        case '/api/health':
+
+        case "/api/health":
           return await handleHealthCheck(env, corsHeaders);
-        
+
         default:
-          if (path.startsWith('/api/user-conversion') && request.method === 'POST') {
+          if (
+            path.startsWith("/api/user-conversion") &&
+            request.method === "POST"
+          ) {
             return await handleUserConversion(request, env, corsHeaders);
           }
-          
-          return new Response('Not Found', { 
-            status: 404, 
-            headers: corsHeaders 
+
+          return new Response("Not Found", {
+            status: 404,
+            headers: corsHeaders,
           });
       }
     } catch (error) {
-      console.error('API Error:', error);
-      
-      return new Response(JSON.stringify({ 
-        error: 'Internal Server Error',
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }), { 
-        status: 500, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
+      console.error("API Error:", error);
+
+      return new Response(
+        JSON.stringify({
+          error: "Internal Server Error",
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
     }
-  }
+  },
 };
 
 /**
  * Handle exchange rate requests
  */
 async function handleGetRates(searchParams, env, corsHeaders) {
-  const from = searchParams.get('from');
-  const to = searchParams.get('to');
-  const date = searchParams.get('date') || getCurrentDate();
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const date = searchParams.get("date") || getCurrentDate();
 
   let query;
   let params = [];
@@ -105,8 +114,9 @@ async function handleGetRates(searchParams, env, corsHeaders) {
       LIMIT 1
     `;
     params = [from.toUpperCase(), to.toUpperCase(), date];
-    result = await env.DB.prepare(query).bind(...params).first();
-    
+    result = await env.DB.prepare(query)
+      .bind(...params)
+      .first();
   } else if (from) {
     // All rates for a base currency
     query = `
@@ -116,9 +126,10 @@ async function handleGetRates(searchParams, env, corsHeaders) {
       ORDER BY target_currency
     `;
     params = [from.toUpperCase(), date];
-    const { results } = await env.DB.prepare(query).bind(...params).all();
+    const { results } = await env.DB.prepare(query)
+      .bind(...params)
+      .all();
     result = results;
-    
   } else {
     // Latest rates summary
     query = `
@@ -129,7 +140,9 @@ async function handleGetRates(searchParams, env, corsHeaders) {
       ORDER BY base_currency
     `;
     params = [date];
-    const { results } = await env.DB.prepare(query).bind(...params).all();
+    const { results } = await env.DB.prepare(query)
+      .bind(...params)
+      .all();
     result = results;
   }
 
@@ -139,17 +152,18 @@ async function handleGetRates(searchParams, env, corsHeaders) {
     metadata: {
       date: date,
       timestamp: new Date().toISOString(),
-      query_type: from && to ? 'single_pair' : from ? 'base_currency' : 'summary',
-      cached: true // D1 data is cached by nature
-    }
+      query_type:
+        from && to ? "single_pair" : from ? "base_currency" : "summary",
+      cached: true, // D1 data is cached by nature
+    },
   };
 
   return new Response(JSON.stringify(response), {
-    headers: { 
-      ...corsHeaders, 
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
-    }
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+    },
   });
 }
 
@@ -163,34 +177,34 @@ async function handleGetMetadata(env, corsHeaders) {
     ORDER BY created_at DESC 
     LIMIT 1
   `;
-  
+
   const result = await env.DB.prepare(query).first();
-  
+
   // Get cache status
   const cacheQuery = `
     SELECT value as last_update 
     FROM cache_status 
     WHERE key = 'last_data_update'
   `;
-  
+
   const cacheResult = await env.DB.prepare(cacheQuery).first();
-  
+
   const metadata = {
-    last_fetch: result?.last_fetch_date || 'Never',
+    last_fetch: result?.last_fetch_date || "Never",
     total_currencies: result?.total_currencies || 0,
     total_records: result?.total_records || 0,
-    fetch_source: result?.fetch_source || 'unknown',
-    last_cache_update: cacheResult?.last_update || 'Never',
+    fetch_source: result?.fetch_source || "unknown",
+    last_cache_update: cacheResult?.last_update || "Never",
     server_time: new Date().toISOString(),
-    database_status: 'online'
+    database_status: "online",
   };
 
   return new Response(JSON.stringify(metadata), {
-    headers: { 
-      ...corsHeaders, 
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300' // Cache for 5 minutes
-    }
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+    },
   });
 }
 
@@ -203,28 +217,32 @@ async function handleGetStatus(env, corsHeaders) {
     FROM quick_status 
     WHERE endpoint = 'exchange_rates'
   `;
-  
+
   const statusResult = await env.DB.prepare(statusQuery).first();
-  
+
   const now = new Date();
-  const lastUpdate = statusResult?.last_updated ? new Date(statusResult.last_updated) : null;
-  const hoursSinceUpdate = lastUpdate ? (now - lastUpdate) / (1000 * 60 * 60) : 999;
-  
+  const lastUpdate = statusResult?.last_updated
+    ? new Date(statusResult.last_updated)
+    : null;
+  const hoursSinceUpdate = lastUpdate
+    ? (now - lastUpdate) / (1000 * 60 * 60)
+    : 999;
+
   const status = {
     online: true,
-    last_update: statusResult?.last_updated || 'Never',
+    last_update: statusResult?.last_updated || "Never",
     hours_since_update: Math.round(hoursSinceUpdate * 10) / 10,
     has_new_data: hoursSinceUpdate > 1, // Show update button if data is >1 hour old
-    status: statusResult?.status || 'unknown',
-    next_update: getNextUpdateTime()
+    status: statusResult?.status || "unknown",
+    next_update: getNextUpdateTime(),
   };
 
   return new Response(JSON.stringify(status), {
-    headers: { 
-      ...corsHeaders, 
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=60' // Cache for 1 minute
-    }
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=60", // Cache for 1 minute
+    },
   });
 }
 
@@ -236,34 +254,36 @@ async function handleHealthCheck(env, corsHeaders) {
     // Simple database connectivity test
     const testQuery = `SELECT 1 as test`;
     await env.DB.prepare(testQuery).first();
-    
+
     const health = {
-      status: 'healthy',
-      database: 'connected',
+      status: "healthy",
+      database: "connected",
       timestamp: new Date().toISOString(),
-      version: '1.0.0'
+      version: "1.0.0",
     };
 
     return new Response(JSON.stringify(health), {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'application/json' 
-      }
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
     });
-    
   } catch (error) {
-    return new Response(JSON.stringify({
-      status: 'unhealthy',
-      database: 'disconnected',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    }), {
-      status: 503,
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'application/json' 
+    return new Response(
+      JSON.stringify({
+        status: "unhealthy",
+        database: "disconnected",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 503,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
   }
 }
 
@@ -273,16 +293,19 @@ async function handleHealthCheck(env, corsHeaders) {
 async function handleUserConversion(request, env, corsHeaders) {
   try {
     const { from, to, session } = await request.json();
-    
+
     if (!from || !to) {
-      return new Response(JSON.stringify({ 
-        error: 'Missing required fields: from, to' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Missing required fields: from, to",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
-    
+
     const query = `
       INSERT OR REPLACE INTO user_conversions 
       (from_currency, to_currency, last_accessed, access_count, user_session)
@@ -295,31 +318,38 @@ async function handleUserConversion(request, env, corsHeaders) {
         ?
       )
     `;
-    
-    await env.DB.prepare(query).bind(
-      from.toUpperCase(), 
-      to.toUpperCase(),
-      from.toUpperCase(), 
-      to.toUpperCase(), 
-      session || 'anonymous',
-      session || 'anonymous'
-    ).run();
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: 'Conversion tracked'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-    
+    await env.DB.prepare(query)
+      .bind(
+        from.toUpperCase(),
+        to.toUpperCase(),
+        from.toUpperCase(),
+        to.toUpperCase(),
+        session || "anonymous",
+        session || "anonymous"
+      )
+      .run();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Conversion tracked",
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      error: 'Failed to track conversion',
-      message: error.message
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Failed to track conversion",
+        message: error.message,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 }
 
@@ -327,7 +357,7 @@ async function handleUserConversion(request, env, corsHeaders) {
  * Utility functions
  */
 function getCurrentDate() {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function getNextUpdateTime() {

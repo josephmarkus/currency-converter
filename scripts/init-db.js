@@ -21,7 +21,7 @@ async function initDatabase() {
     // Read schema file
     const schemaPath = path.join(__dirname, "../cloudflare/schema.sql");
     console.log(`📄 Reading schema from: ${schemaPath}`);
-    
+
     const schema = await fs.readFile(schemaPath, "utf-8");
     console.log(`📏 Schema file size: ${schema.length} bytes`);
 
@@ -41,12 +41,14 @@ async function initDatabase() {
       .filter((s) => s.length > 0);
 
     console.log(`📋 Executing ${statements.length} SQL statements...`);
-    
+
     // Count statement types
-    const tables = statements.filter(s => s.includes('CREATE TABLE')).length;
-    const indexes = statements.filter(s => s.includes('CREATE INDEX')).length;
-    const inserts = statements.filter(s => s.includes('INSERT')).length;
-    console.log(`   Tables: ${tables}, Indexes: ${indexes}, Inserts: ${inserts}`);
+    const tables = statements.filter((s) => s.includes("CREATE TABLE")).length;
+    const indexes = statements.filter((s) => s.includes("CREATE INDEX")).length;
+    const inserts = statements.filter((s) => s.includes("INSERT")).length;
+    console.log(
+      `   Tables: ${tables}, Indexes: ${indexes}, Inserts: ${inserts}`
+    );
 
     let successCount = 0;
     let errorCount = 0;
@@ -101,11 +103,11 @@ async function initDatabase() {
     if (errorCount > 0) {
       console.log(`   Errors: ${errorCount} statements`);
     }
-    
+
     // Fail if any table creation failed
     if (tableErrors > 0) {
       console.error(`\n❌ CRITICAL: ${tableErrors} table(s) failed to create!`);
-      console.error('Database is not properly initialized. Exiting.');
+      console.error("Database is not properly initialized. Exiting.");
       process.exit(1);
     }
   } catch (error) {

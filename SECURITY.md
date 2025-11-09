@@ -58,11 +58,13 @@ npx wrangler deploy
 ### Step 6: Test Authentication
 
 **Without API Key (should fail):**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/metadata
 ```
 
 Expected response:
+
 ```json
 {
   "error": "Unauthorized",
@@ -71,12 +73,14 @@ Expected response:
 ```
 
 **With API Key (should succeed):**
+
 ```bash
 curl -H "X-API-Key: your_api_key_here" \
   https://currency-converter-worker.josephmarkus.workers.dev/api/metadata
 ```
 
 Expected response:
+
 ```json
 {
   "last_fetch": "2025-11-09",
@@ -86,6 +90,7 @@ Expected response:
 ```
 
 **Health check (no auth required):**
+
 ```bash
 curl https://currency-converter-worker.josephmarkus.workers.dev/api/health
 ```
@@ -100,10 +105,10 @@ The worker allows requests from any origin (`*`). To restrict to specific domain
 
 ```javascript
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://yourdomain.com', // Your deployed site
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-  'Access-Control-Max-Age': '86400',
+  "Access-Control-Allow-Origin": "https://yourdomain.com", // Your deployed site
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+  "Access-Control-Max-Age": "86400",
 };
 ```
 
@@ -111,18 +116,20 @@ For multiple domains:
 
 ```javascript
 function getCorsHeaders(request) {
-  const origin = request.headers.get('Origin');
+  const origin = request.headers.get("Origin");
   const allowedOrigins = [
-    'https://yourdomain.com',
-    'https://staging.yourdomain.com',
-    'http://localhost:5173', // Vite dev server
+    "https://yourdomain.com",
+    "https://staging.yourdomain.com",
+    "http://localhost:5173", // Vite dev server
   ];
-  
+
   return {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-    'Access-Control-Max-Age': '86400',
+    "Access-Control-Allow-Origin": allowedOrigins.includes(origin)
+      ? origin
+      : allowedOrigins[0],
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+    "Access-Control-Max-Age": "86400",
   };
 }
 ```
@@ -152,13 +159,13 @@ Restrict to specific IPs (e.g., GitHub Actions IPs):
 
 ```javascript
 const ALLOWED_IPS = [
-  '140.82.112.0/20',  // GitHub Actions IP range
-  'your.home.ip.address', // Your IP
+  "140.82.112.0/20", // GitHub Actions IP range
+  "your.home.ip.address", // Your IP
 ];
 
 function isAllowedIP(request) {
-  const ip = request.headers.get('CF-Connecting-IP');
-  return ALLOWED_IPS.some(range => ipInRange(ip, range));
+  const ip = request.headers.get("CF-Connecting-IP");
+  return ALLOWED_IPS.some((range) => ipInRange(ip, range));
 }
 ```
 
@@ -171,8 +178,8 @@ The app automatically includes the API key from `.env`:
 ```typescript
 // In src/config.ts
 export const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
+  "Content-Type": "application/json",
+  ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
 });
 
 // Used in currency-service.ts
@@ -188,9 +195,9 @@ Update your scripts to include the API key (future enhancement):
 ```javascript
 // In scripts/fetch-rates.js
 const headers = {
-  'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-  'Content-Type': 'application/json',
-  'X-API-Key': process.env.WORKER_API_KEY, // Add this
+  Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+  "Content-Type": "application/json",
+  "X-API-Key": process.env.WORKER_API_KEY, // Add this
 };
 ```
 
