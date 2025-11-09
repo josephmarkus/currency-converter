@@ -12,7 +12,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
       'Access-Control-Max-Age': '86400',
     };
 
@@ -22,6 +22,22 @@ export default {
         status: 204,
         headers: corsHeaders 
       });
+    }
+
+    // Authentication check (except for health endpoint)
+    if (path !== '/api/health') {
+      const apiKey = request.headers.get('X-API-Key');
+      const isAuthenticated = apiKey && env.API_KEY && apiKey === env.API_KEY;
+      
+      if (!isAuthenticated) {
+        return new Response(JSON.stringify({ 
+          error: 'Unauthorized',
+          message: 'Valid API key required'
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     try {

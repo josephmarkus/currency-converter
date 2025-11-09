@@ -6,7 +6,7 @@ compatibility_date = "2023-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "currency-converter-db"
-database_id = "your-database-id-here"
+database_id = "a5d50b43-e790-451c-9fb0-2d8045bfd5a2"
 
 [env.production]
 name = "currency-converter-worker"
