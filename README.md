@@ -37,7 +37,28 @@ A modern, offline-first currency converter built with Solid.js, Tailwind CSS, an
 
 4. Open your browser and navigate to `http://localhost:3000` (or the port shown in terminal)
 
-### Offline Development with Mock Data
+### Deploying the Cloudflare Worker
+
+To deploy the currency API worker to Cloudflare:
+
+1. Install Wrangler CLI (if not already):
+
+   ```sh
+   npm install -g wrangler
+   ```
+
+2. Authenticate Wrangler with your Cloudflare account:
+
+   ```sh
+   wrangler login
+   ```
+
+3. Deploy the worker:
+   ```sh
+   wrangler deploy cloudflare/worker.js
+   ```
+
+Make sure your `wrangler.toml` is configured correctly in the `cloudflare/` directory.
 
 For offline development and testing:
 

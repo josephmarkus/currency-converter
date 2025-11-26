@@ -24,12 +24,14 @@ export default {
       });
     }
 
-    // Authentication check (except for health endpoint)
+    // Authentication check (except for health endpoint and requests from pocketfx.app)
     if (path !== "/api/health") {
+      const origin = request.headers.get("Origin");
       const apiKey = request.headers.get("X-API-Key");
+      const isPocketFx = origin === "https://www.pocketfx.app";
       const isAuthenticated = apiKey && env.API_KEY && apiKey === env.API_KEY;
 
-      if (!isAuthenticated) {
+      if (!isAuthenticated && !isPocketFx) {
         return new Response(
           JSON.stringify({
             error: "Unauthorized",
