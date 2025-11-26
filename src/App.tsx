@@ -16,6 +16,14 @@ const App: Component = () => {
   const currencyService = new CurrencyService();
   const [metadata, setMetadata] = createSignal(currencyService.getMetadata());
 
+  // Fetch rates on first load if never fetched before
+  createEffect(() => {
+    const meta = metadata();
+    if (meta.lastFetch === "Never") {
+      fetchRates();
+    }
+  });
+
   // Update metadata periodically
   createEffect(() => {
     const interval = setInterval(() => {
@@ -124,6 +132,9 @@ const App: Component = () => {
               <span class="text-sm text-darkyellow">
                 Rates last updated:{" "}
                 {(() => {
+                  if (isLoading() && metadata().lastFetch === "Never") {
+                    return "Loading...";
+                  }
                   const latest = currencyService.getLatestUpdateDate(
                     fromCurrency()
                   );
@@ -132,7 +143,7 @@ const App: Component = () => {
               </span>
             </div>
 
-            {metadata().isOnline && (
+            {metadata().isOnline && metadata().hasNewData && (
               <div class="mt-2 sm:mt-0 w-full sm:w-auto">
                 <button
                   onClick={handleManualRefresh}

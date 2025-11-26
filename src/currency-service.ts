@@ -142,11 +142,21 @@ export class CurrencyService {
 
     const lastFetchDate = new Date(lastFetch);
     const now = new Date();
-    const hoursSinceLastFetch =
-      (now.getTime() - lastFetchDate.getTime()) / (1000 * 60 * 60);
 
-    // Consider data stale after 1 hour
-    return hoursSinceLastFetch > 1;
+    // Get UTC dates to compare calendar days
+    const lastFetchDay = new Date(
+      Date.UTC(
+        lastFetchDate.getUTCFullYear(),
+        lastFetchDate.getUTCMonth(),
+        lastFetchDate.getUTCDate()
+      )
+    );
+    const today = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
+
+    // New data is available if we're on a different day
+    return lastFetchDay.getTime() !== today.getTime();
   }
 
   private updateMetadata(): void {
