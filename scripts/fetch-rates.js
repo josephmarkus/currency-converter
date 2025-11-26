@@ -53,27 +53,38 @@ async function main() {
     console.log("🚀 Starting exchange rate fetch process...");
 
     const today = new Date().toISOString().split("T")[0];
-    console.log(`📅 Fetching rates for: ${today}`);
-
-    // Check if we should skip (data already exists and not forced)
-    if (!process.env.FORCE_UPDATE || process.env.FORCE_UPDATE === "false") {
-      const existingData = await checkExistingData(today);
-      if (existingData) {
-        console.log("✅ Data already exists for today. Skipping fetch.");
-        return;
-      }
-    }
 
     // Fetch all exchange rates
     const allRates = await fetchAllExchangeRates(today);
     console.log(`💱 Fetched ${allRates.length} exchange rate records`);
 
+    // Find the latest source_date from all rates
+    const latestSourceDate =
+      allRates.length > 0
+        ? allRates.reduce((latest, rate) => {
+            return new Date(rate.source_date) > new Date(latest)
+              ? rate.source_date
+              : latest;
+          }, allRates[0].source_date)
+        : today;
+
+    console.log(`📅 Fetching rates for: ${latestSourceDate}`);
+
+    // Check if we should skip (data already exists and not forced)
+    if (!process.env.FORCE_UPDATE || process.env.FORCE_UPDATE === "false") {
+      const existingData = await checkExistingData(latestSourceDate);
+      if (existingData) {
+        console.log("✅ Data already exists for this date. Skipping fetch.");
+        return;
+      }
+    }
+
     // Upload to Cloudflare D1
-    await uploadToCloudflare(allRates, today);
+    await uploadToCloudflare(allRates, latestSourceDate);
     console.log("✅ Successfully uploaded all exchange rates to Cloudflare D1");
 
     // Log summary
-    const summary = generateSummary(allRates, today);
+    const summary = generateSummary(allRates, latestSourceDate);
     console.log("\n📊 Fetch Summary:");
     console.log(summary);
   } catch (error) {

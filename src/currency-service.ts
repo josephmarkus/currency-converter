@@ -8,6 +8,21 @@ import {
 } from "./config";
 
 export class CurrencyService {
+  /**
+   * Returns the latest update date for a given base currency, or null if not available.
+   */
+  getLatestUpdateDate(base: CurrencyCode): string | null {
+    const rates = this.cache.get(base);
+    if (!rates || rates.length === 0) return null;
+    // Find the rate with the most recent date
+    let latestRate = rates[0];
+    for (const rate of rates) {
+      if (new Date(rate.date) > new Date(latestRate.date)) {
+        latestRate = rate;
+      }
+    }
+    return latestRate.date;
+  }
   private cache: Map<string, ExchangeRate[]> = new Map();
 
   constructor() {

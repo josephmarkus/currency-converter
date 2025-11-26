@@ -56,7 +56,8 @@ const App: Component = () => {
         toCurrency()
       );
       setConvertedAmount(converted);
-      setMetadata(currencyService.getMetadata());
+      // Force update of metadata and re-render
+      setMetadata({ ...currencyService.getMetadata() });
     } catch (error) {
       console.error("Failed to fetch rates:", error);
     } finally {
@@ -71,22 +72,29 @@ const App: Component = () => {
   };
 
   const formatLastFetch = (lastFetch: string) => {
-    if (lastFetch === "Never") return "Never";
-
+    if (lastFetch === "Never" || !lastFetch) return "Never";
+    // Only show time if the string includes a time (contains 'T')
+    if (/^\d{4}-\d{2}-\d{2}$/.test(lastFetch) || !lastFetch.includes("T")) {
+      const date = new Date(lastFetch);
+      const day = date.getUTCDate();
+      const month = date.toLocaleString("en-US", {
+        month: "long",
+        timeZone: "UTC",
+      });
+      const year = date.getUTCFullYear();
+      return `${day} ${month} ${year}`;
+    }
+    // Otherwise, show date and time
     const date = new Date(lastFetch);
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffInMinutes < 1) return "Just now";
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} hours ago`;
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} days ago`;
+    const year = date.getUTCFullYear();
+    const month = date.toLocaleString("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    const day = date.getUTCDate();
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    return `${year} ${month} ${day} ${hours}:${minutes} GMT`;
   };
 
   return (
@@ -102,8 +110,8 @@ const App: Component = () => {
 
         {/* Status Bar */}
         <div class="bg-darkblue rounded-lg p-4 mb-6 border-2 border-darkyellow">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="flex flex-row flex-wrap items-center space-x-2">
               <div
                 class={`w-3 h-3 rounded-full ${
                   metadata().isOnline ? "bg-[#39FF14]" : "bg-[#FF073A]"
@@ -114,18 +122,26 @@ const App: Component = () => {
               </span>
               <span class="text-sm text-darkyellow">•</span>
               <span class="text-sm text-darkyellow">
-                Last updated: {formatLastFetch(metadata().lastFetch)}
+                Rates last updated:{" "}
+                {(() => {
+                  const latest = currencyService.getLatestUpdateDate(
+                    fromCurrency()
+                  );
+                  return formatLastFetch(latest ?? "Never");
+                })()}
               </span>
             </div>
 
-            {metadata().isOnline && metadata().hasNewData && (
-              <button
-                onClick={handleManualRefresh}
-                disabled={isLoading()}
-                class="bg-darkyellow hover:bg-yellow-300 disabled:bg-yellow-200 text-darkblue px-4 py-2 rounded-md text-sm font-medium transition-colors border border-darkyellow"
-              >
-                {isLoading() ? "Updating..." : "Update Rates"}
-              </button>
+            {metadata().isOnline && (
+              <div class="mt-2 sm:mt-0 w-full sm:w-auto">
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isLoading()}
+                  class="bg-darkyellow hover:bg-yellow-300 disabled:bg-yellow-200 text-darkblue px-4 py-2 rounded-md text-sm font-medium transition-colors border border-darkyellow w-full sm:w-auto"
+                >
+                  {isLoading() ? "Updating..." : "Update Rates"}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -141,7 +157,9 @@ const App: Component = () => {
               <div class="space-y-3">
                 <select
                   value={fromCurrency()}
-                  onChange={(e) => setFromCurrency(e.target.value as CurrencyCode)}
+                  onChange={(e) =>
+                    setFromCurrency(e.target.value as CurrencyCode)
+                  }
                   class="w-full p-3 pr-8 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
                 >
                   <For each={Object.entries(CURRENCIES)}>
@@ -173,7 +191,9 @@ const App: Component = () => {
               <div class="space-y-3">
                 <select
                   value={toCurrency()}
-                  onChange={(e) => setToCurrency(e.target.value as CurrencyCode)}
+                  onChange={(e) =>
+                    setToCurrency(e.target.value as CurrencyCode)
+                  }
                   class="w-full p-3 pr-8 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
                 >
                   <For each={Object.entries(CURRENCIES)}>
