@@ -29,9 +29,11 @@ export default {
       const origin = request.headers.get("Origin");
       const apiKey = request.headers.get("X-API-Key");
       const isPocketFx = origin === "https://www.pocketfx.app";
+      const isLocalhost =
+        origin?.includes("localhost") || origin?.includes("127.0.0.1");
       const isAuthenticated = apiKey && env.API_KEY && apiKey === env.API_KEY;
 
-      if (!isAuthenticated && !isPocketFx) {
+      if (!isAuthenticated && !isPocketFx && !isLocalhost) {
         return new Response(
           JSON.stringify({
             error: "Unauthorized",
@@ -100,7 +102,15 @@ export default {
 async function handleGetRates(searchParams, env, corsHeaders) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
-  const date = searchParams.get("date") || getCurrentDate();
+  let date = searchParams.get("date");
+
+  // If no date specified, get the most recent date from the database
+  if (!date) {
+    const latestDateQuery = await env.DB.prepare(
+      "SELECT date FROM exchange_rates ORDER BY date DESC LIMIT 1"
+    ).first();
+    date = latestDateQuery?.date || getCurrentDate();
+  }
 
   let query;
   let params = [];

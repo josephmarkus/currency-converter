@@ -1,13 +1,10 @@
 const CACHE_NAME = 'currency-converter-v1';
 const CURRENCY_API_CACHE = 'currency-api-v1';
 
-// Files to cache for offline use
+// Files to cache for offline use (only cache in production builds)
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/src/index.tsx',
-  '/src/App.tsx',
-  '/src/index.css',
 ];
 
 // Install event - cache static assets
@@ -39,8 +36,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests
-  if (url.hostname === 'api.frankfurter.app') {
+  // Handle API requests (both Frankfurter and Cloudflare Worker)
+  if (url.hostname === 'api.frankfurter.app' || 
+      url.hostname.includes('workers.dev')) {
     event.respondWith(handleApiRequest(request));
     return;
   }
