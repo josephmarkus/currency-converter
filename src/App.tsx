@@ -111,7 +111,7 @@ const App: Component = () => {
         {/* Header */}
         <div class="text-center mb-8">
           <h1 class="text-4xl font-bold text-darkyellow mb-2">
-            Currency Converter
+            PocketFX
           </h1>
           <p class="text-darkyellow">Exchange rates with offline support</p>
         </div>
