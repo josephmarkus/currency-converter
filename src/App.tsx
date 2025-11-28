@@ -181,13 +181,22 @@ const App: Component = () => {
                 </select>
 
                 <input
-                  type="number"
+                  type="text"
+                  inputmode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   value={amount()}
-                  onInput={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                  onInput={(e) => {
+                    const value = e.target.value;
+                    // Allow only numbers and decimal point
+                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                      setAmount(parseFloat(value) || 0);
+                    } else {
+                      // Reset to previous valid value
+                      e.target.value = amount().toString();
+                    }
+                  }}
                   placeholder="Enter amount"
                   class="w-full p-3 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow placeholder-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
-                  min="0"
-                  step="0.01"
                 />
               </div>
             </div>
