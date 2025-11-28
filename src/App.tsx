@@ -110,9 +110,7 @@ const App: Component = () => {
       <div class="max-w-2xl mx-auto">
         {/* Header */}
         <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold text-darkyellow mb-2">
-            PocketFX
-          </h1>
+          <h1 class="text-4xl font-bold text-darkyellow mb-2">PocketFX</h1>
           <p class="text-darkyellow">Exchange rates with offline support</p>
         </div>
 

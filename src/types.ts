@@ -46,6 +46,7 @@ export interface ExchangeRate {
   target: CurrencyCode;
   rate: number;
   date: string;
+  source_date?: string; // Actual date of the exchange rates from the source
 }
 
 export interface FetchMetadata {

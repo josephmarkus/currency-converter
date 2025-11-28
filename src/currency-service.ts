@@ -21,7 +21,8 @@ export class CurrencyService {
         latestRate = rate;
       }
     }
-    return latestRate.date;
+    // Return source_date if available, otherwise fall back to date
+    return latestRate.source_date || latestRate.date;
   }
   private cache: Map<string, ExchangeRate[]> = new Map();
 
@@ -50,6 +51,7 @@ export class CurrencyService {
         target: item.target_currency,
         rate: item.rate,
         date: item.date,
+        source_date: item.source_date,
       }));
 
       // Cache the rates
