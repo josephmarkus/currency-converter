@@ -106,29 +106,45 @@ const App: Component = () => {
   };
 
   return (
-    <div class="min-h-screen bg-darkblue text-darkyellow p-4">
-      <div class="max-w-2xl mx-auto">
+    <div class="min-h-screen bg-darkblue text-darkyellow p-4 sm:p-6 lg:p-8">
+      <div class="max-w-xl mx-auto">
         {/* Header */}
-        <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold text-darkyellow mb-2">PocketFX</h1>
-          <p class="text-darkyellow">Exchange rates with offline support</p>
-        </div>
+        <header class="text-center mb-10 pt-4">
+          <h1 class="text-5xl sm:text-6xl font-bold gradient-text mb-3 tracking-tight">
+            PocketFX
+          </h1>
+          <p class="text-darkyellow-muted text-sm tracking-wide">
+            Exchange rates with offline support
+          </p>
+        </header>
 
-        {/* Status Bar */}
-        <div class="bg-darkblue rounded-lg p-4 mb-6 border-2 border-darkyellow">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div class="flex flex-row flex-wrap items-center space-x-2">
-              <div
-                class={`w-3 h-3 rounded-full ${
-                  metadata().isOnline ? "bg-[#39FF14]" : "bg-[#FF073A]"
-                }`}
-              ></div>
-              <span class="text-sm text-darkyellow">
-                {metadata().isOnline ? "Online" : "Offline"}
-              </span>
-              <span class="text-sm text-darkyellow">•</span>
-              <span class="text-sm text-darkyellow">
-                Rates last updated:{" "}
+        {/* Main Converter Card */}
+        <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-glow">
+          {/* Status Indicator */}
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8 pb-4 border-b border-darkyellow-subtle">
+            <div class="flex items-center justify-between sm:justify-start gap-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class={`status-dot w-2.5 h-2.5 rounded-full ${
+                    metadata().isOnline ? "bg-[#4fd1c5]" : "bg-[#f687b3]"
+                  }`}
+                ></div>
+                <span class="text-xs text-darkyellow-muted uppercase tracking-widest">
+                  {metadata().isOnline ? "Online" : "Offline"}
+                </span>
+              </div>
+              {metadata().isOnline && metadata().hasNewData && (
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isLoading()}
+                  class="btn-glow sm:hidden bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                >
+                  {isLoading() ? "..." : "Update"}
+                </button>
+              )}
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-darkyellow-muted">
                 {(() => {
                   if (isLoading() && metadata().lastFetch === "Never") {
                     return "Loading...";
@@ -136,129 +152,78 @@ const App: Component = () => {
                   const latest = currencyService.getLatestUpdateDate(
                     fromCurrency()
                   );
-                  return formatLastFetch(latest ?? "Never");
+                  const dateStr = formatLastFetch(latest ?? "Never");
+                  return `Rates last updated: ${dateStr}`;
                 })()}
               </span>
-            </div>
-
-            {metadata().isOnline && metadata().hasNewData && (
-              <div class="mt-2 sm:mt-0 w-full sm:w-auto">
+              {metadata().isOnline && metadata().hasNewData && (
                 <button
                   onClick={handleManualRefresh}
                   disabled={isLoading()}
-                  class="bg-darkyellow hover:bg-yellow-300 disabled:bg-yellow-200 text-darkblue px-4 py-2 rounded-md text-sm font-medium transition-colors border border-darkyellow w-full sm:w-auto"
+                  class="btn-glow hidden sm:block bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
                 >
-                  {isLoading() ? "Updating..." : "Update Rates"}
+                  {isLoading() ? "..." : "Update"}
                 </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Currency Converter */}
-        <div class="bg-darkblue rounded-lg p-6 border-2 border-darkyellow">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* From Currency */}
-            <div>
-              <label class="block text-sm font-bold text-darkyellow mb-2">
-                From
-              </label>
-              <div class="space-y-3">
-                <select
-                  value={fromCurrency()}
-                  onChange={(e) =>
-                    setFromCurrency(e.target.value as CurrencyCode)
-                  }
-                  class="w-full p-3 pr-8 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
-                >
-                  <For each={Object.entries(CURRENCIES)}>
-                    {([code, info]) => (
-                      <option value={code} class="bg-darkblue text-darkyellow">
-                        {info.flag} {code} - {info.name}
-                      </option>
-                    )}
-                  </For>
-                </select>
-
-                <input
-                  type="text"
-                  inputmode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={amount()}
-                  onInput={(e) => {
-                    const value = e.target.value;
-                    // Allow only numbers and decimal point
-                    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                      setAmount(parseFloat(value) || 0);
-                    } else {
-                      // Reset to previous valid value
-                      e.target.value = amount().toString();
-                    }
-                  }}
-                  placeholder="Enter amount"
-                  class="w-full p-3 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow placeholder-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
-                />
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* To Currency */}
-            <div>
-              <label class="block text-sm font-bold text-darkyellow mb-2">
-                To
-              </label>
-              <div class="space-y-3">
-                <select
-                  value={toCurrency()}
-                  onChange={(e) =>
-                    setToCurrency(e.target.value as CurrencyCode)
+          {/* From Currency Section */}
+          <div class="mb-6">
+            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-3">
+              From
+            </label>
+            <select
+              value={fromCurrency()}
+              onChange={(e) =>
+                setFromCurrency(e.target.value as CurrencyCode)
+              }
+              class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
+            >
+              <For each={Object.entries(CURRENCIES)}>
+                {([code, info]) => (
+                  <option value={code} class="bg-darkblue text-darkyellow">
+                    {info.flag} {code} - {info.name}
+                  </option>
+                )}
+              </For>
+            </select>
+            <div class="mt-3 relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-darkyellow-muted">
+                {CURRENCIES[fromCurrency()].symbol}
+              </span>
+              <input
+                type="text"
+                inputmode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
+                value={amount()}
+                onInput={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                    setAmount(parseFloat(value) || 0);
+                  } else {
+                    e.target.value = amount().toString();
                   }
-                  class="w-full p-3 pr-8 border-2 border-darkyellow rounded-md bg-darkblue text-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400 hover:border-darkyellow transition-colors"
-                >
-                  <For each={Object.entries(CURRENCIES)}>
-                    {([code, info]) => (
-                      <option value={code} class="bg-darkblue text-darkyellow">
-                        {info.flag} {code} - {info.name}
-                      </option>
-                    )}
-                  </For>
-                </select>
-
-                <div class="p-3 bg-darkblue border-2 border-darkyellow rounded-md">
-                  <div class="text-2xl font-bold text-darkyellow">
-                    {convertedAmount() !== null ? (
-                      <>
-                        {CURRENCIES[toCurrency()].symbol}
-                        {convertedAmount()?.toFixed(2)}
-                      </>
-                    ) : (
-                      <span class="text-darkyellow">Loading...</span>
-                    )}
-                  </div>
-                  {convertedAmount() !== null && (
-                    <div class="text-sm text-darkyellow mt-1">
-                      1 {CURRENCIES[fromCurrency()].symbol} ={" "}
-                      {(convertedAmount()! / amount()).toFixed(4)}{" "}
-                      {CURRENCIES[toCurrency()].symbol}
-                    </div>
-                  )}
-                </div>
-              </div>
+                }}
+                placeholder="0.00"
+                class="w-full p-4 pl-12 rounded-xl bg-darkblue-surface text-darkyellow text-3xl font-bold placeholder-darkyellow-subtle"
+              />
             </div>
           </div>
 
           {/* Swap Button */}
-          <div class="flex justify-center mt-6">
+          <div class="flex justify-center my-4">
             <button
               onClick={() => {
                 const temp = fromCurrency();
                 setFromCurrency(toCurrency());
                 setToCurrency(temp);
               }}
-              class="bg-darkyellow hover:bg-yellow-300 text-darkblue p-3 rounded-full transition-colors border-2 border-darkyellow focus:outline-none focus:border-darkyellow focus:ring-2 focus:ring-blue-400"
+              class="group bg-darkblue-surface hover:bg-darkblue-light border border-darkyellow-subtle hover:border-darkyellow p-3 rounded-full transition-all duration-300 hover:shadow-glow"
               title="Swap currencies"
             >
               <svg
-                class="w-5 h-5"
+                class="w-5 h-5 text-darkyellow transition-transform duration-300 group-hover:rotate-180"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -272,25 +237,65 @@ const App: Component = () => {
               </svg>
             </button>
           </div>
+
+          {/* To Currency Section */}
+          <div>
+            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-3">
+              To
+            </label>
+            <select
+              value={toCurrency()}
+              onChange={(e) =>
+                setToCurrency(e.target.value as CurrencyCode)
+              }
+              class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
+            >
+              <For each={Object.entries(CURRENCIES)}>
+                {([code, info]) => (
+                  <option value={code} class="bg-darkblue text-darkyellow">
+                    {info.flag} {code} - {info.name}
+                  </option>
+                )}
+              </For>
+            </select>
+            <div class="mt-3 p-4 rounded-xl bg-darkblue-surface border border-darkyellow-subtle">
+              <div class="text-4xl font-bold text-darkyellow">
+                {convertedAmount() !== null ? (
+                  <>
+                    <span class="text-darkyellow-muted">
+                      {CURRENCIES[toCurrency()].symbol}
+                    </span>
+                    {convertedAmount()?.toFixed(2)}
+                  </>
+                ) : (
+                  <span class="text-darkyellow-muted animate-pulse">...</span>
+                )}
+              </div>
+              {convertedAmount() !== null && amount() > 0 && (
+                <div class="text-sm text-darkyellow-muted mt-2">
+                  1 {fromCurrency()} = {(convertedAmount()! / amount()).toFixed(4)} {toCurrency()}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Info Footer */}
-        <div class="text-center mt-8 text-sm text-darkyellow">
-          <p>Exchange rates provided by Frankfurter API</p>
-          <p class="mt-1">Data is cached for offline use</p>
-        </div>
-
-        {/* Copyright Footer */}
-        <footer class="text-center mt-8 text-xs text-darkyellow">
-          &copy; 2025{" "}
-          <a
-            href="https://josephmarkus.co.uk/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="underline hover:text-darkyellow"
-          >
-            Joseph Markus
-          </a>
+        {/* Footer */}
+        <footer class="text-center mt-10 space-y-2">
+          <p class="text-xs text-darkyellow-muted">
+            Rates from Frankfurter API · Cached for offline
+          </p>
+          <p class="text-xs text-darkyellow-muted">
+            &copy; 2025{" "}
+            <a
+              href="https://josephmarkus.co.uk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-darkyellow transition-colors underline underline-offset-2"
+            >
+              Joseph Markus
+            </a>
+          </p>
         </footer>
       </div>
 
