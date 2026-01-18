@@ -10,7 +10,7 @@ const App: Component = () => {
   const [toCurrency, setToCurrency] = createSignal<CurrencyCode>("USD");
   const [amount, setAmount] = createSignal(1);
   const [convertedAmount, setConvertedAmount] = createSignal<number | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = createSignal(false);
   const currencyService = new CurrencyService();
@@ -61,7 +61,7 @@ const App: Component = () => {
       const converted = currencyService.convert(
         amount(),
         fromCurrency(),
-        toCurrency()
+        toCurrency(),
       );
       setConvertedAmount(converted);
       // Force update of metadata and re-render
@@ -149,9 +149,8 @@ const App: Component = () => {
                   if (isLoading() && metadata().lastFetch === "Never") {
                     return "Loading...";
                   }
-                  const latest = currencyService.getLatestUpdateDate(
-                    fromCurrency()
-                  );
+                  const latest =
+                    currencyService.getLatestUpdateDate(fromCurrency());
                   const dateStr = formatLastFetch(latest ?? "Never");
                   return `Rates last updated: ${dateStr}`;
                 })()}
@@ -175,9 +174,7 @@ const App: Component = () => {
             </label>
             <select
               value={fromCurrency()}
-              onChange={(e) =>
-                setFromCurrency(e.target.value as CurrencyCode)
-              }
+              onChange={(e) => setFromCurrency(e.target.value as CurrencyCode)}
               class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
             >
               <For each={Object.entries(CURRENCIES)}>
@@ -245,9 +242,7 @@ const App: Component = () => {
             </label>
             <select
               value={toCurrency()}
-              onChange={(e) =>
-                setToCurrency(e.target.value as CurrencyCode)
-              }
+              onChange={(e) => setToCurrency(e.target.value as CurrencyCode)}
               class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
             >
               <For each={Object.entries(CURRENCIES)}>
@@ -273,7 +268,8 @@ const App: Component = () => {
               </div>
               {convertedAmount() !== null && amount() > 0 && (
                 <div class="text-sm text-darkyellow-muted mt-2">
-                  1 {fromCurrency()} = {(convertedAmount()! / amount()).toFixed(4)} {toCurrency()}
+                  1 {fromCurrency()} ={" "}
+                  {(convertedAmount()! / amount()).toFixed(4)} {toCurrency()}
                 </div>
               )}
             </div>
@@ -286,7 +282,7 @@ const App: Component = () => {
             Rates from Frankfurter API · Cached for offline
           </p>
           <p class="text-xs text-darkyellow-muted">
-            &copy; 2025{" "}
+            &copy; 2026{" "}
             <a
               href="https://josephmarkus.co.uk/"
               target="_blank"
