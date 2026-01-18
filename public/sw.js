@@ -47,19 +47,33 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle static assets
+  // For HTML documents, use network-first strategy to ensure users get latest asset references
+  if (request.destination === "document") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache the latest HTML for offline use
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          return response;
+        })
+        .catch(() => {
+          // If network fails, fall back to cached HTML
+          return caches.match(request).then((cached) => cached || caches.match("/index.html"));
+        })
+    );
+    return;
+  }
+
+  // For other static assets (JS, CSS with hashes), use cache-first
   event.respondWith(
     caches
       .match(request)
       .then((response) => {
-        // Return cached version or fetch from network
         return response || fetch(request);
       })
       .catch(() => {
-        // If both cache and network fail, return offline page
-        if (request.destination === "document") {
-          return caches.match("/index.html");
-        }
+        return undefined;
       })
   );
 });
