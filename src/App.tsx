@@ -133,15 +133,15 @@ const App: Component = () => {
                   {metadata().isOnline ? "Online" : "Offline"}
                 </span>
               </div>
-              {metadata().isOnline && metadata().hasNewData && (
-                <button
-                  onClick={handleManualRefresh}
-                  disabled={isLoading()}
-                  class="btn-glow sm:hidden bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
-                >
-                  {isLoading() ? "..." : "Update"}
-                </button>
-              )}
+              <button
+                onClick={handleManualRefresh}
+                disabled={isLoading() || !metadata().isOnline || !metadata().hasNewData}
+                class={`btn-glow sm:hidden bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  metadata().isOnline && metadata().hasNewData ? "visible" : "invisible"
+                }`}
+              >
+                {isLoading() ? "..." : "Update"}
+              </button>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs text-darkyellow-muted">
@@ -155,15 +155,15 @@ const App: Component = () => {
                   return `Rates last updated: ${dateStr}`;
                 })()}
               </span>
-              {metadata().isOnline && metadata().hasNewData && (
-                <button
-                  onClick={handleManualRefresh}
-                  disabled={isLoading()}
-                  class="btn-glow hidden sm:block bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
-                >
-                  {isLoading() ? "..." : "Update"}
-                </button>
-              )}
+              <button
+                onClick={handleManualRefresh}
+                disabled={isLoading() || !metadata().isOnline || !metadata().hasNewData}
+                class={`btn-glow hidden sm:block bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  metadata().isOnline && metadata().hasNewData ? "visible" : "invisible"
+                }`}
+              >
+                {isLoading() ? "..." : "Update"}
+              </button>
             </div>
           </div>
 
