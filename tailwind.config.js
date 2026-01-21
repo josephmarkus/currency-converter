@@ -32,9 +32,6 @@ export default {
           subtle: "rgba(255, 225, 29, 0.15)",
         },
       },
-      borderColor: {
-        darkyellow: "#FFE11D",
-      },
       boxShadow: {
         'glow': '0 0 20px rgba(255, 225, 29, 0.3)',
         'glow-lg': '0 0 40px rgba(255, 225, 29, 0.4)',

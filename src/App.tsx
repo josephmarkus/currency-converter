@@ -8,7 +8,7 @@ const App: Component = () => {
 
   const [fromCurrency, setFromCurrency] = createSignal<CurrencyCode>("GBP");
   const [toCurrency, setToCurrency] = createSignal<CurrencyCode>("USD");
-  const [amount, setAmount] = createSignal(1);
+  const [amount, setAmount] = createSignal<number>(CURRENCIES.GBP.defaultAmount);
   const [convertedAmount, setConvertedAmount] = createSignal<number | null>(
     null,
   );
@@ -81,28 +81,22 @@ const App: Component = () => {
 
   const formatLastFetch = (lastFetch: string) => {
     if (lastFetch === "Never" || !lastFetch) return "Never";
-    // Only show time if the string includes a time (contains 'T')
-    if (/^\d{4}-\d{2}-\d{2}$/.test(lastFetch) || !lastFetch.includes("T")) {
-      const date = new Date(lastFetch);
-      const day = date.getUTCDate();
-      const month = date.toLocaleString("en-US", {
-        month: "long",
-        timeZone: "UTC",
-      });
-      const year = date.getUTCFullYear();
-      return `${day} ${month} ${year}`;
-    }
-    // Otherwise, show date and time
     const date = new Date(lastFetch);
-    const year = date.getUTCFullYear();
-    const month = date.toLocaleString("en-US", {
-      month: "long",
-      timeZone: "UTC",
+    // Use user's locale for formatting
+    if (lastFetch.includes("T")) {
+      return date.toLocaleString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return date.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
-    const day = date.getUTCDate();
-    const hours = String(date.getUTCHours()).padStart(2, "0");
-    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-    return `${year} ${month} ${day} ${hours}:${minutes} GMT`;
   };
 
   return (
@@ -121,8 +115,8 @@ const App: Component = () => {
         {/* Main Converter Card */}
         <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-glow">
           {/* Status Indicator */}
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8 pb-4 border-b border-darkyellow-subtle">
-            <div class="flex items-center justify-between sm:justify-start gap-3">
+          <div class="flex flex-col gap-3 mb-8 pb-4 border-b border-[rgba(255,225,29,0.15)]">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div
                   class={`status-dot w-2.5 h-2.5 rounded-full ${
@@ -133,38 +127,26 @@ const App: Component = () => {
                   {metadata().isOnline ? "Online" : "Offline"}
                 </span>
               </div>
-              <button
-                onClick={handleManualRefresh}
-                disabled={isLoading() || !metadata().isOnline || !metadata().hasNewData}
-                class={`btn-glow sm:hidden bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                  metadata().isOnline && metadata().hasNewData ? "visible" : "invisible"
-                }`}
-              >
-                {isLoading() ? "..." : "Update"}
-              </button>
-            </div>
-            <div class="flex items-center gap-3">
               <span class="text-xs text-darkyellow-muted">
                 {(() => {
                   if (isLoading() && metadata().lastFetch === "Never") {
                     return "Loading...";
                   }
-                  const latest =
-                    currencyService.getLatestUpdateDate(fromCurrency());
-                  const dateStr = formatLastFetch(latest ?? "Never");
-                  return `Rates last updated: ${dateStr}`;
+                  const lastFetch = metadata().lastFetch;
+                  const dateStr = formatLastFetch(lastFetch);
+                  return `Rates: ${dateStr}`;
                 })()}
               </span>
+            </div>
+            {metadata().isOnline && metadata().hasNewData && (
               <button
                 onClick={handleManualRefresh}
-                disabled={isLoading() || !metadata().isOnline || !metadata().hasNewData}
-                class={`btn-glow hidden sm:block bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                  metadata().isOnline && metadata().hasNewData ? "visible" : "invisible"
-                }`}
+                disabled={isLoading()}
+                class="self-start bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
               >
-                {isLoading() ? "..." : "Update"}
+                {isLoading() ? "Updating..." : "Update rates"}
               </button>
-            </div>
+            )}
           </div>
 
           {/* From Currency Section */}
@@ -174,7 +156,11 @@ const App: Component = () => {
             </label>
             <select
               value={fromCurrency()}
-              onChange={(e) => setFromCurrency(e.target.value as CurrencyCode)}
+              onChange={(e) => {
+                const newCurrency = e.target.value as CurrencyCode;
+                setFromCurrency(newCurrency);
+                setAmount(CURRENCIES[newCurrency].defaultAmount);
+              }}
               class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
             >
               <For each={Object.entries(CURRENCIES)}>
@@ -216,7 +202,7 @@ const App: Component = () => {
                 setFromCurrency(toCurrency());
                 setToCurrency(temp);
               }}
-              class="group bg-darkblue-surface hover:bg-darkblue-light border border-darkyellow-subtle hover:border-darkyellow p-3 rounded-full transition-all duration-300 hover:shadow-glow"
+              class="group bg-darkblue-surface hover:bg-darkblue-light border border-[rgba(255,225,29,0.15)] hover:border-darkyellow p-3 rounded-full transition-all duration-300 hover:shadow-glow"
               title="Swap currencies"
             >
               <svg
@@ -253,7 +239,7 @@ const App: Component = () => {
                 )}
               </For>
             </select>
-            <div class="mt-3 p-4 rounded-xl bg-darkblue-surface border border-darkyellow-subtle">
+            <div class="mt-3 p-4 rounded-xl bg-darkblue-surface border border-[rgba(255,225,29,0.15)]">
               <div class="text-4xl font-bold text-darkyellow">
                 {convertedAmount() !== null ? (
                   <>
