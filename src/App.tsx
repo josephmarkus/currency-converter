@@ -82,19 +82,9 @@ const App: Component = () => {
   const formatLastFetch = (lastFetch: string) => {
     if (lastFetch === "Never" || !lastFetch) return "Never";
     const date = new Date(lastFetch);
-    // Use user's locale for formatting
-    if (lastFetch.includes("T")) {
-      return date.toLocaleString(undefined, {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
     return date.toLocaleDateString(undefined, {
       day: "numeric",
-      month: "short",
+      month: "long",
       year: "numeric",
     });
   };
@@ -113,7 +103,7 @@ const App: Component = () => {
         </header>
 
         {/* Main Converter Card */}
-        <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-glow">
+        <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.3),0_10px_20px_-2px_rgba(0,0,0,0.25)]">
           {/* Status Indicator */}
           <div class="flex flex-col gap-3 mb-8 pb-4 border-b border-[rgba(255,225,29,0.15)]">
             <div class="flex items-center justify-between">
@@ -202,7 +192,7 @@ const App: Component = () => {
                 setFromCurrency(toCurrency());
                 setToCurrency(temp);
               }}
-              class="group bg-darkblue-surface hover:bg-darkblue-light border border-[rgba(255,225,29,0.15)] hover:border-darkyellow p-3 rounded-full transition-all duration-300 hover:shadow-glow"
+              class="group bg-darkblue-surface hover:bg-darkblue-light border border-[rgba(255,225,29,0.15)] hover:border-darkyellow p-3 rounded-full transition-all duration-300 hover:scale-105"
               title="Swap currencies"
             >
               <svg
