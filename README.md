@@ -47,27 +47,27 @@ flowchart TB
     end
 
     %% User interactions
-    Browser --> App
-    App --> CurrencyService
+    Browser -->|Opens app| App
+    App -->|Convert currency| CurrencyService
 
     %% Frontend data flow
-    CurrencyService --> LocalStorage
-    CurrencyService --> ServiceWorker
-    ServiceWorker --> Worker
+    CurrencyService <-->|Read/write cache| LocalStorage
+    CurrencyService -->|Request rates| ServiceWorker
+    ServiceWorker -->|Fetch from API| Worker
 
     %% Fallback path
-    CurrencyService -.->|Fallback| Frankfurter
+    CurrencyService -.->|Fallback if API unavailable| Frankfurter
 
     %% Backend data flow
-    Worker --> D1
+    Worker -->|Query rates| D1
 
-    %% Data pipeline
-    Cron --> FetchScript
-    FetchScript --> Frankfurter
-    FetchScript --> D1
+    %% Data pipeline - daily rate ingestion
+    Cron -->|Triggers daily| FetchScript
+    Frankfurter -->|ECB exchange rates| FetchScript
+    FetchScript -->|Store rates| D1
 
     %% Styling
-    style Frontend fill:#1e3a5f,stroke:#FFE11D,color:#fff
+    style Frontend fill:#3b82f6,stroke:#FFE11D,color:#fff
     style Backend fill:#f97316,stroke:#fff,color:#fff
     style DataPipeline fill:#22c55e,stroke:#fff,color:#fff
     style ExternalAPI fill:#8b5cf6,stroke:#fff,color:#fff
