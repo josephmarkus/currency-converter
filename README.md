@@ -13,6 +13,122 @@ A modern, offline-first currency converter built with Solid.js, Tailwind CSS, an
 - **⚡ Fast Performance**: Built with Solid.js and Vite
 - **📲 PWA Ready**: Service worker for offline functionality
 
+## 📐 How It Works
+
+PocketFX is built on a 3-tier architecture with offline-first design principles. The system ensures fast, reliable currency conversions even without an internet connection.
+
+### Architecture Diagram
+
+```mermaid
+flowchart TB
+    subgraph User["👤 User"]
+        Browser["Browser"]
+    end
+
+    subgraph Frontend["Frontend (Solid.js SPA)"]
+        App["App.tsx<br/>Main UI Component"]
+        CurrencyService["currency-service.ts<br/>Data & Caching Layer"]
+        ServiceWorker["sw.js<br/>Service Worker"]
+        LocalStorage["LocalStorage<br/>Persistent Cache"]
+    end
+
+    subgraph Backend["Backend (Cloudflare Edge)"]
+        Worker["worker.js<br/>Cloudflare Worker API"]
+        D1["Cloudflare D1<br/>SQLite Database"]
+    end
+
+    subgraph DataPipeline["Data Pipeline (GitHub Actions)"]
+        Cron["Daily Cron Job<br/>16:00 UTC Mon-Fri"]
+        FetchScript["fetch-rates.js<br/>Rate Fetcher"]
+    end
+
+    subgraph ExternalAPI["External Data Source"]
+        Frankfurter["Frankfurter API<br/>ECB Exchange Rates"]
+    end
+
+    %% User interactions
+    Browser --> App
+    App --> CurrencyService
+
+    %% Frontend data flow
+    CurrencyService --> LocalStorage
+    CurrencyService --> ServiceWorker
+    ServiceWorker --> Worker
+
+    %% Fallback path
+    CurrencyService -.->|Fallback| Frankfurter
+
+    %% Backend data flow
+    Worker --> D1
+
+    %% Data pipeline
+    Cron --> FetchScript
+    FetchScript --> Frankfurter
+    FetchScript --> D1
+
+    %% Styling
+    style Frontend fill:#1e3a5f,stroke:#FFE11D,color:#fff
+    style Backend fill:#f97316,stroke:#fff,color:#fff
+    style DataPipeline fill:#22c55e,stroke:#fff,color:#fff
+    style ExternalAPI fill:#8b5cf6,stroke:#fff,color:#fff
+```
+
+### Data Flow
+
+1. **User Opens App**: The Solid.js frontend loads and checks LocalStorage for cached rates
+2. **Initial Fetch**: If no cached data exists, `CurrencyService` requests rates from the Cloudflare Worker API
+3. **Caching**: Rates are cached in memory and LocalStorage for offline access
+4. **Real-time Conversion**: As users type, conversions happen instantly using cached rates
+5. **Background Updates**: Every 30 seconds, the app checks if newer rates are available
+6. **Manual Refresh**: Users can tap "Update rates" when new data is detected
+
+### Frontend Architecture
+
+| Component | Purpose |
+|-----------|---------|
+| **App.tsx** | Main UI with currency selectors, amount input, and conversion display |
+| **currency-service.ts** | Manages rate fetching, caching, and conversion calculations |
+| **Service Worker** | Caches API responses for offline functionality |
+| **LocalStorage** | Persists exchange rates and user preferences |
+
+### Backend Architecture
+
+| Component | Purpose |
+|-----------|---------|
+| **Cloudflare Worker** | Serverless API serving rates from edge locations worldwide |
+| **D1 Database** | SQLite database storing 44 currencies with daily rate history |
+| **GitHub Actions** | Automated daily workflow fetching rates from European Central Bank |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/rates` | GET | Fetch exchange rates (supports `from`, `to`, `date` params) |
+| `/api/metadata` | GET | Last fetch time, total currencies, data source |
+| `/api/status` | GET | Cache status and new data availability |
+| `/api/health` | GET | Health check (no auth required) |
+
+### Offline-First Strategy
+
+```mermaid
+flowchart LR
+    Request["Rate Request"] --> Network{"Online?"}
+    Network -->|Yes| CloudflareAPI["Cloudflare Worker"]
+    CloudflareAPI --> Cache["Update Cache"]
+    Cache --> Response["Return Rates"]
+
+    Network -->|No| LocalCache["LocalStorage Cache"]
+    LocalCache --> Response
+
+    CloudflareAPI -.->|If fails| Fallback["Frankfurter API"]
+    Fallback --> Cache
+```
+
+The app uses a **network-first** strategy with multiple fallback layers:
+1. **Primary**: Cloudflare Worker API (fast, globally distributed)
+2. **Secondary**: Frankfurter API (reliable public endpoint)
+3. **Tertiary**: LocalStorage cache (always available offline)
+
 ## 🚀 Getting Started
 
 ### Prerequisites
