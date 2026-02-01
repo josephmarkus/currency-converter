@@ -130,7 +130,7 @@ export class CurrencyService {
       return {
         ...metadata,
         isOnline: navigator.onLine,
-        hasNewData: this.hasNewDataAvailable(metadata.rateDate || metadata.lastFetch),
+        hasNewData: this.hasNewDataAvailable(metadata.lastFetch),
       };
     }
 
