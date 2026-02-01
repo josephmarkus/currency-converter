@@ -1,5 +1,6 @@
-const CACHE_NAME = "currency-converter-v1";
-const CURRENCY_API_CACHE = "currency-api-v1";
+const BUILD_VERSION = "__BUILD_VERSION__";
+const CACHE_NAME = `currency-converter-${BUILD_VERSION}`;
+const CURRENCY_API_CACHE = `currency-api-${BUILD_VERSION}`;
 
 // Files to cache for offline use (only cache in production builds)
 const STATIC_ASSETS = ["/", "/index.html"];
