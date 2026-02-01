@@ -184,6 +184,23 @@ const App: Component = () => {
                 class="w-full p-4 pl-12 rounded-xl bg-darkblue-surface text-darkyellow text-3xl font-bold placeholder-darkyellow-subtle"
               />
             </div>
+            <div class="mt-3 flex gap-2">
+              <For each={CURRENCIES[fromCurrency()].quickAmounts}>
+                {(quickAmount) => (
+                  <button
+                    onClick={() => setAmount(quickAmount)}
+                    class={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      amount() === quickAmount
+                        ? "bg-darkyellow text-darkblue"
+                        : "bg-darkblue-surface text-darkyellow-muted hover:bg-darkblue-light hover:text-darkyellow border border-[rgba(255,225,29,0.15)]"
+                    }`}
+                  >
+                    {CURRENCIES[fromCurrency()].symbol}
+                    {quickAmount.toLocaleString()}
+                  </button>
+                )}
+              </For>
+            </div>
           </div>
 
           {/* Swap Button */}
