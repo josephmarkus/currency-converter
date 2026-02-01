@@ -122,7 +122,10 @@ const App: Component = () => {
               <span class="text-xs text-darkyellow-muted">
                 {(() => {
                   if (isLoading() && metadata().rateDate === "Never") {
-                    return "Loading...";
+                    return "Loading rates...";
+                  }
+                  if (metadata().rateDate === "Never") {
+                    return "No rates loaded";
                   }
                   const rateDate = metadata().rateDate;
                   const dateStr = formatRateDate(rateDate);
