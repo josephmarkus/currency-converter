@@ -275,11 +275,10 @@ const App: Component = () => {
         </div>
 
         {/* Footer */}
-        <footer class="text-center mt-10 space-y-2">
-          <p class="text-xs text-darkyellow-muted">
+        <footer class="text-center mt-10 space-y-3">
+          <p class="text-xs text-darkyellow-muted leading-relaxed">
             Rates from Frankfurter API · Cached for offline
-          </p>
-          <p class="text-[10px] text-darkyellow-subtle">
+            <br />
             New rates available Mon–Fri around 16:00 CET, excluding European
             Central Bank holidays
           </p>
