@@ -119,8 +119,15 @@ export function generateMockMetadata() {
   const lastFetch = new Date();
   lastFetch.setMinutes(lastFetch.getMinutes() - Math.floor(Math.random() * 60)); // 0-60 minutes ago
 
+  // Generate a mock rate date (last weekday)
+  const rateDate = new Date();
+  const dayOfWeek = rateDate.getDay();
+  if (dayOfWeek === 0) rateDate.setDate(rateDate.getDate() - 2); // Sunday -> Friday
+  else if (dayOfWeek === 6) rateDate.setDate(rateDate.getDate() - 1); // Saturday -> Friday
+
   return {
     lastFetch: lastFetch.toISOString(),
+    rateDate: rateDate.toISOString().split("T")[0], // YYYY-MM-DD format
     isOnline: true, // Can be toggled for testing
     hasNewData: Math.random() > 0.7, // 30% chance of having new data
     totalCurrencies: Object.keys(USD_BASE_RATES).length,

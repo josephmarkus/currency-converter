@@ -68,10 +68,12 @@ export class MockCurrencyService {
     const cacheKey = `${baseCurrency}_${this.getCurrentDate()}`;
     this.cache.set(cacheKey, rates);
 
-    // Update metadata
+    // Update metadata with actual rate date
+    const rateDate = rates[0]?.date || new Date().toISOString().split("T")[0];
     this.metadata = {
       ...this.metadata,
       lastFetch: new Date().toISOString(),
+      rateDate: rateDate,
       isOnline: true,
       hasNewData: false,
     };

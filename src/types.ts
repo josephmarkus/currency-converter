@@ -51,6 +51,7 @@ export interface ExchangeRate {
 
 export interface FetchMetadata {
   lastFetch: string;
+  rateDate: string; // The actual date of the exchange rates (not when fetched)
   isOnline: boolean;
   hasNewData: boolean;
 }

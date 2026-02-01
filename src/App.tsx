@@ -79,9 +79,11 @@ const App: Component = () => {
     }
   };
 
-  const formatLastFetch = (lastFetch: string) => {
-    if (lastFetch === "Never" || !lastFetch) return "Never";
-    const date = new Date(lastFetch);
+  const formatRateDate = (rateDate: string) => {
+    if (rateDate === "Never" || !rateDate) return "Never";
+    // Parse as UTC date to avoid timezone shifts
+    const [year, month, day] = rateDate.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString(undefined, {
       day: "numeric",
       month: "long",
@@ -119,11 +121,11 @@ const App: Component = () => {
               </div>
               <span class="text-xs text-darkyellow-muted">
                 {(() => {
-                  if (isLoading() && metadata().lastFetch === "Never") {
+                  if (isLoading() && metadata().rateDate === "Never") {
                     return "Loading...";
                   }
-                  const lastFetch = metadata().lastFetch;
-                  const dateStr = formatLastFetch(lastFetch);
+                  const rateDate = metadata().rateDate;
+                  const dateStr = formatRateDate(rateDate);
                   return `Rates: ${dateStr}`;
                 })()}
               </span>
@@ -256,6 +258,10 @@ const App: Component = () => {
         <footer class="text-center mt-10 space-y-2">
           <p class="text-xs text-darkyellow-muted">
             Rates from Frankfurter API · Cached for offline
+          </p>
+          <p class="text-[10px] text-darkyellow-subtle">
+            New rates available Mon–Fri around 16:00 CET, excluding European
+            Central Bank holidays
           </p>
           <p class="text-xs text-darkyellow-muted">
             &copy; 2026{" "}

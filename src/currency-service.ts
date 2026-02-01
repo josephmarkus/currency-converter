@@ -57,7 +57,9 @@ export class CurrencyService {
       // Cache the rates
       this.cache.set(base, rates);
       this.saveToLocalStorage();
-      this.updateMetadata();
+      // Use source_date if available, otherwise fall back to date
+      const rateDate = ratesArray[0]?.source_date || ratesArray[0]?.date || new Date().toISOString();
+      this.updateMetadata(rateDate);
 
       return rates;
     } catch (error) {
@@ -85,7 +87,7 @@ export class CurrencyService {
         // Cache the rates
         this.cache.set(base, rates);
         this.saveToLocalStorage();
-        this.updateMetadata();
+        this.updateMetadata(data.date);
 
         return rates;
       } catch (fallbackError) {
@@ -128,12 +130,13 @@ export class CurrencyService {
       return {
         ...metadata,
         isOnline: navigator.onLine,
-        hasNewData: this.hasNewDataAvailable(metadata.lastFetch),
+        hasNewData: this.hasNewDataAvailable(metadata.rateDate || metadata.lastFetch),
       };
     }
 
     return {
       lastFetch: "Never",
+      rateDate: "Never",
       isOnline: navigator.onLine,
       hasNewData: true,
     };
@@ -161,9 +164,10 @@ export class CurrencyService {
     return lastFetchDay.getTime() !== today.getTime();
   }
 
-  private updateMetadata(): void {
+  private updateMetadata(rateDate: string): void {
     const metadata = {
       lastFetch: new Date().toISOString(),
+      rateDate: rateDate,
     };
     localStorage.setItem(METADATA_KEY, JSON.stringify(metadata));
   }
