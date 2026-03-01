@@ -55,7 +55,7 @@ async function main() {
     const today = new Date().toISOString().split("T")[0];
 
     // Fetch all exchange rates
-    const allRates = await fetchAllExchangeRates(today);
+    const { rates: allRates, failedCurrencies } = await fetchAllExchangeRates(today);
     console.log(`💱 Fetched ${allRates.length} exchange rate records`);
 
     // Find the latest source_date from all rates
@@ -75,6 +75,7 @@ async function main() {
       const existingData = await checkExistingData(latestSourceDate);
       if (existingData) {
         console.log("✅ Data already exists for this date. Skipping fetch.");
+        await writeRunReport({ skipped: true, skipped_reason: "data already exists for this date", source_date: latestSourceDate });
         return;
       }
     }
@@ -87,9 +88,38 @@ async function main() {
     const summary = generateSummary(allRates, latestSourceDate);
     console.log("\n📊 Fetch Summary:");
     console.log(summary);
+
+    // Write run report for generate-summary.js to consume
+    await writeRunReport({
+      skipped: false,
+      skipped_reason: null,
+      source_date: latestSourceDate,
+      rates_fetched: allRates.length,
+      base_currencies_processed: CURRENCIES.length - failedCurrencies.length,
+      base_currencies_total: CURRENCIES.length,
+      base_currencies_failed: failedCurrencies,
+    });
   } catch (error) {
     console.error("❌ Error in main process:", error);
+    await writeRunReport({ error: error.message }).catch(() => {});
     process.exit(1);
+  }
+}
+
+async function writeRunReport(data) {
+  try {
+    const { default: fs } = await import("fs/promises");
+    const { default: path } = await import("path");
+    const { fileURLToPath } = await import("url");
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const dataDir = path.join(path.dirname(__dirname), "data");
+    await fs.mkdir(dataDir, { recursive: true });
+    await fs.writeFile(
+      path.join(dataDir, "run-report.json"),
+      JSON.stringify({ generated_at: new Date().toISOString(), ...data }, null, 2)
+    );
+  } catch (err) {
+    console.error("⚠️  Could not write run report:", err.message);
   }
 }
 
@@ -114,6 +144,7 @@ async function checkExistingData(date) {
 
 async function fetchAllExchangeRates(date) {
   const allRates = [];
+  const failedCurrencies = [];
   let requestCount = 0;
 
   console.log(`🌍 Fetching rates for ${CURRENCIES.length} base currencies...`);
@@ -136,11 +167,11 @@ async function fetchAllExchangeRates(date) {
         `❌ Failed to fetch rates for ${baseCurrency}:`,
         error.message
       );
-      // Continue with other currencies
+      failedCurrencies.push(baseCurrency);
     }
   }
 
-  return allRates;
+  return { rates: allRates, failedCurrencies };
 }
 
 async function fetchCurrencyRates(baseCurrency, date, retryCount = 0) {

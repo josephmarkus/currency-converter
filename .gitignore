@@ -34,6 +34,7 @@ pids/
 # Generated data files
 data/rate-summary.json
 data/status.json
+data/run-report.json
 
 # Cloudflare
 .wrangler/
