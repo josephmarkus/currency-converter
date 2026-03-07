@@ -92,22 +92,22 @@ const App: Component = () => {
   };
 
   return (
-    <div class="min-h-screen bg-darkblue text-darkyellow p-4 sm:p-6 lg:p-8">
-      <div class="max-w-xl mx-auto">
+    <div class="min-h-screen bg-darkblue text-darkyellow py-3 sm:py-5 lg:py-8">
+      <div class="max-w-xl mx-auto min-[576px]:px-4">
         {/* Header */}
-        <header class="text-center mb-10 pt-4">
-          <h1 class="text-5xl sm:text-6xl font-bold gradient-text mb-3 tracking-tight">
+        <header class="text-center mb-4 px-3 min-[576px]:px-0">
+          <h1 class="logo-text font-bold gradient-text leading-none mb-0 tracking-tight">
             PocketFX
           </h1>
-          <p class="text-darkyellow-muted text-sm tracking-wide">
+          <p class="text-darkyellow-muted text-xs tracking-wide">
             Exchange rates with offline support
           </p>
         </header>
 
         {/* Main Converter Card */}
-        <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.3),0_10px_20px_-2px_rgba(0,0,0,0.25)]">
+        <div class="glass-card rounded-none min-[576px]:rounded-2xl p-4 sm:p-6">
           {/* Status Indicator */}
-          <div class="flex flex-col gap-3 mb-8 pb-4 border-b border-[rgba(255,225,29,0.15)]">
+          <div class="flex flex-col gap-2 mb-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div
@@ -145,8 +145,8 @@ const App: Component = () => {
           </div>
 
           {/* From Currency Section */}
-          <div class="mb-6">
-            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-3">
+          <div class="mb-4">
+            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-2">
               From
             </label>
             <select
@@ -156,7 +156,7 @@ const App: Component = () => {
                 setFromCurrency(newCurrency);
                 setAmount(CURRENCIES[newCurrency].defaultAmount);
               }}
-              class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
+              class="w-full p-3 sm:p-4 rounded-xl bg-darkblue-surface text-darkyellow text-base sm:text-lg cursor-pointer"
             >
               <For each={Object.entries(CURRENCIES)}>
                 {([code, info]) => (
@@ -166,8 +166,8 @@ const App: Component = () => {
                 )}
               </For>
             </select>
-            <div class="mt-3 relative">
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-darkyellow-muted">
+            <div class="mt-2 relative">
+              <span class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-xl sm:text-2xl text-darkyellow-muted">
                 {CURRENCIES[fromCurrency()].symbol}
               </span>
               <input
@@ -184,15 +184,15 @@ const App: Component = () => {
                   }
                 }}
                 placeholder="0.00"
-                class="w-full p-4 pl-12 rounded-xl bg-darkblue-surface text-darkyellow text-3xl font-bold placeholder-darkyellow-subtle"
+                class="w-full p-3 pl-10 sm:p-4 sm:pl-12 rounded-xl bg-darkblue-surface text-darkyellow text-2xl sm:text-3xl font-bold placeholder-darkyellow-subtle"
               />
             </div>
-            <div class="mt-3 flex gap-2">
+            <div class="mt-2 flex gap-1.5">
               <For each={CURRENCIES[fromCurrency()].quickAmounts}>
                 {(quickAmount) => (
                   <button
                     onClick={() => setAmount(quickAmount)}
-                    class={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    class={`flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       amount() === quickAmount
                         ? "bg-darkyellow text-darkblue"
                         : "bg-darkblue-surface text-darkyellow-muted hover:bg-darkblue-light hover:text-darkyellow border border-[rgba(255,225,29,0.15)]"
@@ -207,7 +207,7 @@ const App: Component = () => {
           </div>
 
           {/* Swap Button */}
-          <div class="flex justify-center my-4">
+          <div class="flex justify-center my-3">
             <button
               onClick={() => {
                 const temp = fromCurrency();
@@ -235,13 +235,13 @@ const App: Component = () => {
 
           {/* To Currency Section */}
           <div>
-            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-3">
+            <label class="block text-xs font-medium text-darkyellow-muted uppercase tracking-widest mb-2">
               To
             </label>
             <select
               value={toCurrency()}
               onChange={(e) => setToCurrency(e.target.value as CurrencyCode)}
-              class="w-full p-4 rounded-xl bg-darkblue-surface text-darkyellow text-lg cursor-pointer"
+              class="w-full p-3 sm:p-4 rounded-xl bg-darkblue-surface text-darkyellow text-base sm:text-lg cursor-pointer"
             >
               <For each={Object.entries(CURRENCIES)}>
                 {([code, info]) => (
@@ -251,8 +251,8 @@ const App: Component = () => {
                 )}
               </For>
             </select>
-            <div class="mt-3 p-4 rounded-xl bg-darkblue-surface border border-[rgba(255,225,29,0.15)]">
-              <div class="text-4xl font-bold text-darkyellow">
+            <div class="mt-2 p-3 sm:p-4 rounded-xl border border-[rgba(255,225,29,0.1)]">
+              <div class="text-3xl sm:text-4xl font-bold text-darkyellow">
                 {convertedAmount() !== null ? (
                   <>
                     <span class="text-darkyellow-muted">
@@ -265,7 +265,7 @@ const App: Component = () => {
                 )}
               </div>
               {convertedAmount() !== null && amount() > 0 && (
-                <div class="text-sm text-darkyellow-muted mt-2">
+                <div class="text-xs sm:text-sm text-darkyellow-muted mt-1.5">
                   1 {fromCurrency()} ={" "}
                   {(convertedAmount()! / amount()).toFixed(4)} {toCurrency()}
                 </div>
@@ -275,7 +275,7 @@ const App: Component = () => {
         </div>
 
         {/* Footer */}
-        <footer class="text-center mt-10 space-y-3">
+        <footer class="text-center mt-6 space-y-2 px-3 min-[576px]:px-0">
           <p class="text-xs text-darkyellow-muted leading-relaxed">
             Rates from Frankfurter API · Cached for offline
             <br />
