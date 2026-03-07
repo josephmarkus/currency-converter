@@ -107,18 +107,8 @@ const App: Component = () => {
         {/* Main Converter Card */}
         <div class="glass-card rounded-none min-[576px]:rounded-2xl p-4 sm:p-6">
           {/* Status Indicator */}
-          <div class="flex flex-col gap-2 mb-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div
-                  class={`status-dot w-2.5 h-2.5 rounded-full ${
-                    metadata().isOnline ? "bg-[#4fd1c5]" : "bg-[#f687b3]"
-                  }`}
-                ></div>
-                <span class="text-xs text-darkyellow-muted uppercase tracking-widest">
-                  {metadata().isOnline ? "Online" : "Offline"}
-                </span>
-              </div>
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex flex-col gap-2">
               <span class="text-xs text-darkyellow-muted">
                 {(() => {
                   if (isLoading() && metadata().rateDate === "Never") {
@@ -132,16 +122,26 @@ const App: Component = () => {
                   return `Rates: ${dateStr}`;
                 })()}
               </span>
+              {metadata().isOnline && metadata().hasNewData && (
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isLoading()}
+                  class="self-start bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
+                >
+                  {isLoading() ? "Updating..." : "Update rates"}
+                </button>
+              )}
             </div>
-            {metadata().isOnline && metadata().hasNewData && (
-              <button
-                onClick={handleManualRefresh}
-                disabled={isLoading()}
-                class="self-start bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
-              >
-                {isLoading() ? "Updating..." : "Update rates"}
-              </button>
-            )}
+            <div class="flex items-center gap-2">
+              <div
+                class={`status-dot w-2.5 h-2.5 rounded-full ${
+                  metadata().isOnline ? "bg-[#4fd1c5]" : "bg-[#f687b3]"
+                }`}
+              ></div>
+              <span class="text-xs text-darkyellow-muted">
+                {metadata().isOnline ? "Online" : "Offline"}
+              </span>
+            </div>
           </div>
 
           {/* From Currency Section */}
