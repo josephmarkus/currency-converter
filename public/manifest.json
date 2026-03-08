@@ -1,11 +1,11 @@
 {
-  "name": "Currency Converter",
-  "short_name": "CurrencyConv",
-  "description": "Offline-first currency converter with real-time exchange rates",
+  "name": "PocketFX",
+  "short_name": "PocketFX",
+  "description": "Convert between 35+ world currencies with real-time exchange rates and offline support.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "background_color": "#010B40",
+  "theme_color": "#010B40",
   "orientation": "portrait-primary",
   "icons": [
     {
