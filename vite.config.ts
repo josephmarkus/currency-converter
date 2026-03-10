@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import solid from "vite-plugin-solid";
+import react from "@vitejs/plugin-react";
 import { execSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
@@ -30,12 +30,25 @@ function serviceWorkerPlugin() {
   };
 }
 
-export default defineConfig({
-  plugins: [solid(), serviceWorkerPlugin()],
-  server: {
-    port: 3000,
-  },
-  build: {
-    target: "esnext",
-  },
+export default defineConfig(({ command }) => {
+  const isProd = command === "build";
+
+  return {
+    plugins: [react(), serviceWorkerPlugin()],
+    resolve: {
+      alias: isProd
+        ? {
+            react: "preact/compat",
+            "react-dom": "preact/compat",
+            "react/jsx-runtime": "preact/jsx-runtime",
+          }
+        : undefined,
+    },
+    server: {
+      port: 3000,
+    },
+    build: {
+      target: "esnext",
+    },
+  };
 });
