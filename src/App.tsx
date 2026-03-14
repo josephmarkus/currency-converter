@@ -95,21 +95,21 @@ const App = () => {
           <div className="flex items-start justify-between mb-4">
             <div>
               <span className="text-xs text-darkyellow-muted">
-                {(() => {
-                  const noRates = !metadata.rateDate || metadata.rateDate === "Never";
-                  if (noRates) return isLoading ? "Loading rates..." : "Fetching rates...";
-                  return `Rates: ${formatRateDate(metadata.rateDate)}`;
-                })()}
-                {metadata.isOnline && metadata.hasNewData && (
+                {metadata.rateDate && metadata.rateDate !== "Never" && (
                   <>
-                    {" · "}
-                    <button
-                      onClick={handleManualRefresh}
-                      disabled={isLoading}
-                      className={`underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer ${isLoading ? "no-underline" : "underline"}`}
-                    >
-                      {isLoading ? "Getting latest rates..." : "Update rates"}
-                    </button>
+                    {`Rates: ${formatRateDate(metadata.rateDate)}`}
+                    {metadata.isOnline && metadata.hasNewData && (
+                      <>
+                        {" · "}
+                        <button
+                          onClick={handleManualRefresh}
+                          disabled={isLoading}
+                          className={`underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer ${isLoading ? "" : "underline"}`}
+                        >
+                          {isLoading ? "Getting latest rates..." : "Update rates"}
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </span>

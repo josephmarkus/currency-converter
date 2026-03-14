@@ -97,26 +97,6 @@ describe("App — auto-fetch on mount", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Loading state
-// ---------------------------------------------------------------------------
-
-describe("App — loading state", () => {
-  it("shows 'Loading rates...' when loading and rateDate is Never", async () => {
-    // fetchRates never resolves, keeping isLoading true
-    mockFetchRates.mockReturnValue(new Promise(() => {}));
-    render(<App />);
-    expect(await screen.findByText("Loading rates...")).toBeInTheDocument();
-  });
-
-  it("shows 'Fetching rates...' when not loading and rateDate is Never", async () => {
-    // fetchRates resolves quickly, isLoading returns to false
-    mockFetchRates.mockResolvedValue([]);
-    render(<App />);
-    await waitFor(() => expect(screen.getByText("Fetching rates...")).toBeInTheDocument());
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Currency selector interactions
 // ---------------------------------------------------------------------------
 
