@@ -29,10 +29,11 @@ const App = () => {
     }
   };
 
-  // Fetch rates on first load if never fetched before
+  // Fetch rates on first load if no rates are available
   useEffect(() => {
-    if (currencyService.getMetadata().lastFetch === "Never") {
-      fetchRates("GBP", CURRENCIES.GBP.defaultAmount, "USD");
+    const meta = currencyService.getMetadata();
+    if (!meta.rateDate || meta.rateDate === "Never") {
+      fetchRates(fromCurrency, amount, toCurrency);
     }
   }, []);
 
@@ -95,12 +96,8 @@ const App = () => {
             <div className="flex flex-col gap-2">
               <span className="text-xs text-darkyellow-muted">
                 {(() => {
-                  if (isLoading && metadata.rateDate === "Never") {
-                    return "Loading rates...";
-                  }
-                  if (metadata.rateDate === "Never") {
-                    return "No rates loaded";
-                  }
+                  const noRates = !metadata.rateDate || metadata.rateDate === "Never";
+                  if (noRates) return isLoading ? "Loading rates..." : "Fetching rates...";
                   return `Rates: ${formatRateDate(metadata.rateDate)}`;
                 })()}
               </span>

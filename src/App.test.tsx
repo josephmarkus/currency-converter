@@ -76,7 +76,7 @@ describe("App — initial render", () => {
 // ---------------------------------------------------------------------------
 
 describe("App — auto-fetch on mount", () => {
-  it("calls fetchRates with GBP when lastFetch is Never", async () => {
+  it("calls fetchRates when rateDate is Never", async () => {
     render(<App />);
     await waitFor(() => expect(mockFetchRates).toHaveBeenCalledWith("GBP"));
   });
@@ -108,11 +108,11 @@ describe("App — loading state", () => {
     expect(await screen.findByText("Loading rates...")).toBeInTheDocument();
   });
 
-  it("shows 'No rates loaded' when not loading and rateDate is Never", async () => {
+  it("shows 'Fetching rates...' when not loading and rateDate is Never", async () => {
     // fetchRates resolves quickly, isLoading returns to false
     mockFetchRates.mockResolvedValue([]);
     render(<App />);
-    await waitFor(() => expect(screen.getByText("No rates loaded")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Fetching rates...")).toBeInTheDocument());
   });
 });
 
