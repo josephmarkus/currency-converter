@@ -106,9 +106,9 @@ const App = () => {
                     <button
                       onClick={handleManualRefresh}
                       disabled={isLoading}
-                      className="underline underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer"
+                      className={`underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer ${isLoading ? "no-underline" : "underline"}`}
                     >
-                      {isLoading ? "Updating..." : "Update rates"}
+                      {isLoading ? "Getting latest rates..." : "Update rates"}
                     </button>
                   </>
                 )}

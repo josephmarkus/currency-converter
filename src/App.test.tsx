@@ -266,7 +266,7 @@ describe("App — Update rates button", () => {
     mockFetchRates.mockReturnValue(new Promise(() => {}));
     await user.click(updateBtn);
     await waitFor(() => {
-      const btn = screen.getByRole("button", { name: /Updating\.\.\./i });
+      const btn = screen.getByRole("button", { name: /Getting latest rates\.\.\./i });
       expect(btn).toBeDisabled();
     });
   });
