@@ -93,23 +93,26 @@ const App = () => {
         <div className="glass-card rounded-none min-[576px]:rounded-2xl p-4 sm:p-6">
           {/* Status Indicator */}
           <div className="flex items-start justify-between mb-4">
-            <div className="flex flex-col gap-2">
+            <div>
               <span className="text-xs text-darkyellow-muted">
                 {(() => {
                   const noRates = !metadata.rateDate || metadata.rateDate === "Never";
                   if (noRates) return isLoading ? "Loading rates..." : "Fetching rates...";
                   return `Rates: ${formatRateDate(metadata.rateDate)}`;
                 })()}
+                {metadata.isOnline && metadata.hasNewData && (
+                  <>
+                    {" · "}
+                    <button
+                      onClick={handleManualRefresh}
+                      disabled={isLoading}
+                      className="underline underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer"
+                    >
+                      {isLoading ? "Updating..." : "Update rates"}
+                    </button>
+                  </>
+                )}
               </span>
-              {metadata.isOnline && metadata.hasNewData && (
-                <button
-                  onClick={handleManualRefresh}
-                  disabled={isLoading}
-                  className="self-start bg-darkyellow hover:bg-darkyellow-rich disabled:opacity-50 text-darkblue px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
-                >
-                  {isLoading ? "Updating..." : "Update rates"}
-                </button>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <div
