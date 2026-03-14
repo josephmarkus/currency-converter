@@ -15,7 +15,11 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [metadata, setMetadata] = useState(() => currencyService.getMetadata());
 
-  const fetchRates = async (from: CurrencyCode, amt: number, to: CurrencyCode) => {
+  const fetchRates = async (
+    from: CurrencyCode,
+    amt: number,
+    to: CurrencyCode,
+  ) => {
     setIsLoading(true);
     try {
       await currencyService.fetchRates(from);
@@ -92,27 +96,27 @@ const App = () => {
         {/* Main Converter Card */}
         <div className="glass-card rounded-none min-[576px]:rounded-2xl p-4 sm:p-6">
           {/* Status Indicator */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <span className="text-xs text-darkyellow-muted">
-                {metadata.rateDate && metadata.rateDate !== "Never" && (
-                  <>
-                    {`Rates: ${formatRateDate(metadata.rateDate)}`}
-                    {metadata.isOnline && metadata.hasNewData && (
-                      <>
-                        {" · "}
-                        <button
-                          onClick={handleManualRefresh}
-                          disabled={isLoading}
-                          className={`underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer ${isLoading ? "" : "underline"}`}
-                        >
-                          {isLoading ? "Getting latest rates..." : "Update rates"}
-                        </button>
-                      </>
-                    )}
-                  </>
-                )}
-              </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs text-darkyellow-muted">
+              {metadata.rateDate && metadata.rateDate !== "Never" ? (
+                <>
+                  {`Rates: ${formatRateDate(metadata.rateDate)}`}
+                  {metadata.isOnline && metadata.hasNewData && (
+                    <>
+                      {" · "}
+                      <button
+                        onClick={handleManualRefresh}
+                        disabled={isLoading}
+                        className={`underline-offset-2 hover:text-darkyellow disabled:opacity-50 transition-colors duration-200 cursor-pointer ${isLoading ? "" : "underline"}`}
+                      >
+                        {isLoading ? "Getting latest rates..." : "Update rates"}
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                ` `
+              )}
             </div>
             <div className="flex items-center gap-2">
               <div
@@ -141,7 +145,11 @@ const App = () => {
               className="w-full p-3 sm:p-4 rounded-xl bg-darkblue-surface text-darkyellow text-base sm:text-lg cursor-pointer"
             >
               {Object.entries(CURRENCIES).map(([code, info]) => (
-                <option key={code} value={code} className="bg-darkblue text-darkyellow">
+                <option
+                  key={code}
+                  value={code}
+                  className="bg-darkblue text-darkyellow"
+                >
                   {info.flag} {code} - {info.name}
                 </option>
               ))}
@@ -222,7 +230,11 @@ const App = () => {
               className="w-full p-3 sm:p-4 rounded-xl bg-darkblue-surface text-darkyellow text-base sm:text-lg cursor-pointer"
             >
               {Object.entries(CURRENCIES).map(([code, info]) => (
-                <option key={code} value={code} className="bg-darkblue text-darkyellow">
+                <option
+                  key={code}
+                  value={code}
+                  className="bg-darkblue text-darkyellow"
+                >
                   {info.flag} {code} - {info.name}
                 </option>
               ))}
@@ -237,13 +249,15 @@ const App = () => {
                     {convertedAmount?.toFixed(2)}
                   </>
                 ) : (
-                  <span className="text-darkyellow-muted animate-pulse">...</span>
+                  <span className="text-darkyellow-muted animate-pulse">
+                    ...
+                  </span>
                 )}
               </div>
               {convertedAmount !== null && amount > 0 && (
                 <div className="text-xs sm:text-sm text-darkyellow-muted mt-1.5">
-                  1 {fromCurrency} ={" "}
-                  {(convertedAmount! / amount).toFixed(4)} {toCurrency}
+                  1 {fromCurrency} = {(convertedAmount! / amount).toFixed(4)}{" "}
+                  {toCurrency}
                 </div>
               )}
             </div>
