@@ -14,10 +14,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "./server";
-import { workerApiNetworkError } from "./handlers/workerApi";
+import { frankfurterError } from "./handlers/frankfurterApi";
 
-const WORKER_RATES_URL =
-  "https://currency-converter-worker.josephmarkus.workers.dev/api/rates";
+const FRANKFURTER_RATES_URL = "https://api.frankfurter.app/latest";
 
 // ---------------------------------------------------------------------------
 // Stub factory helpers
@@ -96,8 +95,8 @@ describe("handleApiRequest", () => {
   });
 
   it("returns the network response on success and stores it in cache", async () => {
-    // Default MSW handler returns 200 for the worker API
-    const request = new Request(`${WORKER_RATES_URL}?from=GBP`);
+    // Default MSW handler returns 200 for the Frankfurter API
+    const request = new Request(`${FRANKFURTER_RATES_URL}?from=GBP`);
     const result = await handleApiRequest(request, mockCaches);
 
     expect(result.status).toBe(200);
@@ -106,13 +105,13 @@ describe("handleApiRequest", () => {
   });
 
   it("returns cached response when network throws", async () => {
-    server.use(workerApiNetworkError);
+    server.use(frankfurterError);
     const cachedResponse = new Response(JSON.stringify({ data: [] }), { status: 200 });
     const cache = makeMockCache();
     cache.match.mockResolvedValue(cachedResponse);
     mockCaches.open.mockResolvedValue(cache);
 
-    const request = new Request(`${WORKER_RATES_URL}?from=GBP`);
+    const request = new Request(`${FRANKFURTER_RATES_URL}?from=GBP`);
     const result = await handleApiRequest(request, mockCaches);
 
     expect(result.status).toBe(200);
@@ -120,25 +119,25 @@ describe("handleApiRequest", () => {
   });
 
   it("returns cached response when network responds with non-ok status", async () => {
-    server.use(http.get(WORKER_RATES_URL, () => new HttpResponse(null, { status: 500 })));
+    server.use(http.get(FRANKFURTER_RATES_URL, () => new HttpResponse(null, { status: 500 })));
     const cachedResponse = new Response(JSON.stringify({ data: [] }), { status: 200 });
     const cache = makeMockCache();
     cache.match.mockResolvedValue(cachedResponse);
     mockCaches.open.mockResolvedValue(cache);
 
-    const request = new Request(`${WORKER_RATES_URL}?from=GBP`);
+    const request = new Request(`${FRANKFURTER_RATES_URL}?from=GBP`);
     const result = await handleApiRequest(request, mockCaches);
 
     expect(result.status).toBe(200);
   });
 
   it("returns 503 JSON when network fails and no cached response exists", async () => {
-    server.use(workerApiNetworkError);
+    server.use(frankfurterError);
     const cache = makeMockCache();
     cache.match.mockResolvedValue(undefined);
     mockCaches.open.mockResolvedValue(cache);
 
-    const request = new Request(`${WORKER_RATES_URL}?from=GBP`);
+    const request = new Request(`${FRANKFURTER_RATES_URL}?from=GBP`);
     const result = await handleApiRequest(request, mockCaches);
 
     expect(result.status).toBe(503);

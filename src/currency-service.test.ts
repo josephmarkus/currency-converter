@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { CurrencyService } from "./currency-service";
 import { server } from "./test/server";
-import {
-  workerApiError500,
-  workerApiNetworkError,
-} from "./test/handlers/workerApi";
 import { frankfurterError } from "./test/handlers/frankfurterApi";
 
 describe("CurrencyService", () => {
@@ -16,10 +12,10 @@ describe("CurrencyService", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // fetchRates — primary API success
+  // fetchRates
   // ---------------------------------------------------------------------------
 
-  describe("fetchRates — primary API", () => {
+  describe("fetchRates", () => {
     it("populates the in-memory cache", async () => {
       await service.fetchRates("GBP");
       expect(service.getCachedRates("GBP")).not.toBeNull();
@@ -53,41 +49,22 @@ describe("CurrencyService", () => {
         date: expect.any(String),
       });
     });
-  });
 
-  // ---------------------------------------------------------------------------
-  // fetchRates — fallback chain
-  // ---------------------------------------------------------------------------
-
-  describe("fetchRates — fallback to Frankfurter", () => {
-    it("succeeds via Frankfurter when worker returns 500", async () => {
-      server.use(workerApiError500);
-      const rates = await service.fetchRates("GBP");
-      expect(rates.length).toBeGreaterThan(0);
-      expect(rates[0].base).toBe("GBP");
-    });
-
-    it("succeeds via Frankfurter when worker has a network error", async () => {
-      server.use(workerApiNetworkError);
-      const rates = await service.fetchRates("GBP");
-      expect(rates.length).toBeGreaterThan(0);
-    });
-
-    it("returns pre-cached rates when both APIs fail", async () => {
+    it("returns pre-cached rates when the API fails", async () => {
       const cachedRates = [
         { base: "GBP", target: "USD", rate: 1.27, date: "2026-03-07" },
       ];
       localStorage.setItem("currency-rates", JSON.stringify({ GBP: cachedRates }));
       service = new CurrencyService();
 
-      server.use(workerApiNetworkError, frankfurterError);
+      server.use(frankfurterError);
       const rates = await service.fetchRates("GBP");
       expect(rates).toHaveLength(1);
       expect(rates[0].target).toBe("USD");
     });
 
-    it("returns empty array when both APIs fail and no cache exists", async () => {
-      server.use(workerApiNetworkError, frankfurterError);
+    it("returns empty array when the API fails and no cache exists", async () => {
+      server.use(frankfurterError);
       const rates = await service.fetchRates("GBP");
       expect(rates).toEqual([]);
     });

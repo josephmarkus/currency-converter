@@ -39,11 +39,8 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests (both Frankfurter and Cloudflare Worker)
-  if (
-    url.hostname === "api.frankfurter.app" ||
-    url.hostname.includes("workers.dev")
-  ) {
+  // Handle API requests
+  if (url.hostname === "api.frankfurter.app") {
     event.respondWith(handleApiRequest(request));
     return;
   }

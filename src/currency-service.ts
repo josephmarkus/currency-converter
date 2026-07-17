@@ -1,11 +1,5 @@
 import { CurrencyCode, ExchangeRate, FetchMetadata } from "./types";
-import {
-  API_ENDPOINTS,
-  CACHE_KEY,
-  METADATA_KEY,
-  FRANKFURTER_API,
-  getHeaders,
-} from "./config";
+import { CACHE_KEY, METADATA_KEY, FRANKFURTER_API } from "./config";
 
 export class CurrencyService {
   /**
@@ -32,69 +26,32 @@ export class CurrencyService {
 
   async fetchRates(base: CurrencyCode): Promise<ExchangeRate[]> {
     try {
-      // Try worker API first
-      const response = await fetch(`${API_ENDPOINTS.rates}?from=${base}`, {
-        headers: getHeaders(),
-      });
+      const response = await fetch(`${FRANKFURTER_API}/latest?from=${base}`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch rates from worker");
+        throw new Error("Failed to fetch rates from Frankfurter API");
       }
 
-      const { data } = await response.json();
-
-      // Handle both array and single object responses
-      const ratesArray = Array.isArray(data) ? data : [data];
-
-      const rates: ExchangeRate[] = ratesArray.map((item: any) => ({
-        base: item.base_currency,
-        target: item.target_currency,
-        rate: item.rate,
-        date: item.date,
-        source_date: item.source_date,
-      }));
+      const data = await response.json();
+      const rates: ExchangeRate[] = Object.entries(data.rates).map(
+        ([target, rate]) => ({
+          base,
+          target: target as CurrencyCode,
+          rate: rate as number,
+          date: data.date,
+        })
+      );
 
       // Cache the rates
       this.cache.set(base, rates);
       this.saveToLocalStorage();
-      // Use source_date if available, otherwise fall back to date
-      const rateDate = ratesArray[0]?.source_date || ratesArray[0]?.date || new Date().toISOString();
-      this.updateMetadata(rateDate);
+      this.updateMetadata(data.date);
 
       return rates;
     } catch (error) {
-      console.error("Error fetching rates from worker:", error);
-
-      // Fallback to Frankfurter API
-      try {
-        console.log("Falling back to Frankfurter API...");
-        const response = await fetch(`${FRANKFURTER_API}/latest?from=${base}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch rates from fallback API");
-        }
-
-        const data = await response.json();
-        const rates: ExchangeRate[] = Object.entries(data.rates).map(
-          ([target, rate]) => ({
-            base,
-            target: target as CurrencyCode,
-            rate: rate as number,
-            date: data.date,
-          })
-        );
-
-        // Cache the rates
-        this.cache.set(base, rates);
-        this.saveToLocalStorage();
-        this.updateMetadata(data.date);
-
-        return rates;
-      } catch (fallbackError) {
-        console.error("Fallback API also failed:", fallbackError);
-        // Return cached data if available
-        return this.getCachedRates(base) || [];
-      }
+      console.error("Error fetching rates from Frankfurter API:", error);
+      // Return cached data if available
+      return this.getCachedRates(base) || [];
     }
   }
 

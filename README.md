@@ -15,7 +15,7 @@ A modern, offline-first currency converter built with Solid.js, Tailwind CSS, an
 
 ## 📐 How It Works
 
-PocketFX is built on a 3-tier architecture with offline-first design principles. The system ensures fast, reliable currency conversions even without an internet connection.
+PocketFX is built with offline-first design principles. The system ensures fast, reliable currency conversions even without an internet connection.
 
 ### Architecture Diagram
 
@@ -32,16 +32,6 @@ flowchart TB
         LocalStorage["LocalStorage<br/>Persistent Cache"]
     end
 
-    subgraph Backend["Backend (Cloudflare Edge)"]
-        Worker["worker.js<br/>Cloudflare Worker API"]
-        D1["Cloudflare D1<br/>SQLite Database"]
-    end
-
-    subgraph DataPipeline["Data Pipeline (GitHub Actions)"]
-        Cron["Daily Cron Job<br/>16:00 UTC Mon-Fri"]
-        FetchScript["fetch-rates.js<br/>Rate Fetcher"]
-    end
-
     subgraph ExternalAPI["External Data Source"]
         Frankfurter["Frankfurter API<br/>ECB Exchange Rates"]
     end
@@ -53,30 +43,17 @@ flowchart TB
     %% Frontend data flow
     CurrencyService <-->|Read/write cache| LocalStorage
     CurrencyService -->|Request rates| ServiceWorker
-    ServiceWorker -->|Fetch from API| Worker
-
-    %% Fallback path
-    CurrencyService -.->|Fallback if API unavailable| Frankfurter
-
-    %% Backend data flow
-    Worker -->|Query rates| D1
-
-    %% Data pipeline - daily rate ingestion
-    Cron -->|Triggers daily| FetchScript
-    Frankfurter -->|ECB exchange rates| FetchScript
-    FetchScript -->|Store rates| D1
+    ServiceWorker -->|Fetch from API| Frankfurter
 
     %% Styling
     style Frontend fill:#3b82f6,stroke:#FFE11D,color:#fff
-    style Backend fill:#f97316,stroke:#fff,color:#fff
-    style DataPipeline fill:#22c55e,stroke:#fff,color:#fff
     style ExternalAPI fill:#8b5cf6,stroke:#fff,color:#fff
 ```
 
 ### Data Flow
 
-1. **User Opens App**: The Solid.js frontend loads and checks LocalStorage for cached rates
-2. **Initial Fetch**: If no cached data exists, `CurrencyService` requests rates from the Cloudflare Worker API
+1. **User Opens App**: The frontend loads and checks LocalStorage for cached rates
+2. **Initial Fetch**: If no cached data exists, `CurrencyService` requests rates directly from the Frankfurter API
 3. **Caching**: Rates are cached in memory and LocalStorage for offline access
 4. **Real-time Conversion**: As users type, conversions happen instantly using cached rates
 5. **Background Updates**: Every 30 seconds, the app checks if newer rates are available
@@ -91,43 +68,22 @@ flowchart TB
 | **Service Worker** | Caches API responses for offline functionality |
 | **LocalStorage** | Persists exchange rates and user preferences |
 
-### Backend Architecture
-
-| Component | Purpose |
-|-----------|---------|
-| **Cloudflare Worker** | Serverless API serving rates from edge locations worldwide |
-| **D1 Database** | SQLite database storing 44 currencies with daily rate history |
-| **GitHub Actions** | Automated daily workflow fetching rates from European Central Bank |
-
-### API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/rates` | GET | Fetch exchange rates (supports `from`, `to`, `date` params) |
-| `/api/metadata` | GET | Last fetch time, total currencies, data source |
-| `/api/status` | GET | Cache status and new data availability |
-| `/api/health` | GET | Health check (no auth required) |
-
 ### Offline-First Strategy
 
 ```mermaid
 flowchart LR
     Request["Rate Request"] --> Network{"Online?"}
-    Network -->|Yes| CloudflareAPI["Cloudflare Worker"]
-    CloudflareAPI --> Cache["Update Cache"]
+    Network -->|Yes| Frankfurter["Frankfurter API"]
+    Frankfurter --> Cache["Update Cache"]
     Cache --> Response["Return Rates"]
 
     Network -->|No| LocalCache["LocalStorage Cache"]
     LocalCache --> Response
-
-    CloudflareAPI -.->|If fails| Fallback["Frankfurter API"]
-    Fallback --> Cache
 ```
 
-The app uses a **network-first** strategy with multiple fallback layers:
-1. **Primary**: Cloudflare Worker API (fast, globally distributed)
-2. **Secondary**: Frankfurter API (reliable public endpoint)
-3. **Tertiary**: LocalStorage cache (always available offline)
+The app uses a **network-first** strategy with a fallback layer:
+1. **Primary**: Frankfurter API (reliable public endpoint)
+2. **Fallback**: LocalStorage cache (always available offline)
 
 ## 🚀 Getting Started
 
@@ -153,29 +109,6 @@ The app uses a **network-first** strategy with multiple fallback layers:
 
 4. Open your browser and navigate to `http://localhost:3000` (or the port shown in terminal)
 
-### Deploying the Cloudflare Worker
-
-To deploy the currency API worker to Cloudflare:
-
-1. Install Wrangler CLI (if not already):
-
-   ```sh
-   npm install -g wrangler
-   ```
-
-2. Authenticate Wrangler with your Cloudflare account:
-
-   ```sh
-   wrangler login
-   ```
-
-3. Deploy the worker:
-   ```sh
-   wrangler deploy cloudflare/worker.js
-   ```
-
-Make sure your `wrangler.toml` is configured correctly in the `cloudflare/` directory.
-
 For offline development and testing:
 
 1. **Open Dev Panel**: Click the "🛠️ Dev Tools" button in the bottom-left corner of the app
@@ -197,15 +130,6 @@ console.table(service.testConversionScenarios());
 ```
 
 See [Mock Data Guide](src/mock/MOCK_DATA.md) for complete testing documentation.
-
-### GitHub Actions Setup (Optional)
-
-For automated daily rate fetching with Cloudflare D1:
-
-1. Follow the detailed setup guide in [SETUP.md](SETUP.md)
-2. Configure your Cloudflare D1 database
-3. Set up GitHub repository secrets
-4. Deploy the GitHub Actions workflow
 
 ### Build for Production
 
@@ -263,42 +187,7 @@ The app supports 30+ major world currencies including:
 - 🇮🇳 INR (Indian Rupee)
 - And many more...
 
-## � GitHub Actions Integration
-
-This project includes a complete GitHub Actions workflow for automated daily exchange rate fetching:
-
-### Features
-
-- **🕘 Daily Schedule**: Automatically fetches rates at 9 AM UTC
-- **☁️ Cloudflare D1**: Stores data in edge database for global access
-- **🔄 Smart Caching**: Only updates when new data is available
-- **📊 Monitoring**: Generates summaries and health reports
-- **🚨 Alerts**: Optional Slack notifications on failures
-- **🌍 Global CDN**: Data served from Cloudflare's edge network
-
-### Files Included
-
-- `.github/workflows/fetch-exchange-rates.yml` - Main workflow
-- `scripts/fetch-rates.js` - Rate fetching script
-- `scripts/update-cache-timestamp.js` - Cache management
-- `scripts/generate-summary.js` - Monitoring reports
-- `cloudflare/schema.sql` - Database schema
-- `cloudflare/worker.js` - API worker (optional)
-- `SETUP.md` - Complete setup guide
-
-### Quick Setup
-
-1. Create Cloudflare D1 database
-2. Set GitHub repository secrets:
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
-   - `CLOUDFLARE_DATABASE_ID`
-3. Run workflow manually to test
-4. Enjoy automated daily updates!
-
-See [SETUP.md](SETUP.md) for detailed instructions.
-
-## �🔧 Key Features Explained
+## 🔧 Key Features Explained
 
 ### Offline-First Design
 
@@ -346,19 +235,13 @@ The service worker provides offline functionality by:
 
 ## 🚀 Deployment
 
-### GitHub Actions Integration
-
-The project is designed to work with GitHub Actions for automated data fetching:
-
-1. **Daily Workflow**: Fetches fresh exchange rates daily
-2. **Cloudflare D1 Integration**: Stores data in edge database
-3. **Global Distribution**: Fast access worldwide
+The app is a static, fully client-side SPA — no backend to deploy or maintain.
 
 ### Deployment Options
 
 - **Netlify**: Zero-config deployment with edge functions
 - **Vercel**: Serverless deployment with global CDN
-- **Cloudflare Pages**: Edge deployment with D1 database
+- **Cloudflare Pages**: Edge deployment for static sites
 - **Static Hosting**: Works with any static file hosting
 
 ## 🤝 Contributing

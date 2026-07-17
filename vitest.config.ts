@@ -15,10 +15,4 @@ export default defineConfig({
       reporter: ["text", "html"],
     },
   },
-  define: {
-    "import.meta.env.VITE_API_URL": JSON.stringify(
-      "https://currency-converter-worker.josephmarkus.workers.dev"
-    ),
-    "import.meta.env.VITE_API_KEY": JSON.stringify(""),
-  },
 });

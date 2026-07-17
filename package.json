@@ -7,14 +7,6 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "db:local:init": "wrangler d1 execute currency-converter-db --local --file=cloudflare/schema.sql",
-    "db:local:query": "wrangler d1 execute currency-converter-db --local --command",
-    "db:remote:init": "wrangler d1 execute currency-converter-db --remote --file=cloudflare/schema.sql",
-    "init-db": "node scripts/init-db.js",
-    "fetch-rates": "node scripts/fetch-rates.js",
-    "test-fetch": "FORCE_UPDATE=true node scripts/fetch-rates.js",
-    "generate-summary": "node scripts/generate-summary.js",
-    "update-cache": "node scripts/update-cache-timestamp.js",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
@@ -40,7 +32,6 @@
     "vitest": "^4.1.0"
   },
   "dependencies": {
-    "node-fetch": "^2.7.0",
     "preact": "^10.25.0"
   }
 }
