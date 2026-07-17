@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw";
 import { USD_BASE_RATES } from "../../mock/mockData";
 import { CurrencyCode } from "../../types";
 
-const FRANKFURTER_BASE = "https://api.frankfurter.app";
+const FRANKFURTER_BASE = "https://api.frankfurter.dev/v1";
 
 function buildFrankfurterRates(base: string) {
   const baseRate = USD_BASE_RATES[base as CurrencyCode] ?? 1;

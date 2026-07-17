@@ -40,7 +40,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   // Handle API requests
-  if (url.hostname === "api.frankfurter.app") {
+  if (url.hostname === "api.frankfurter.dev") {
     event.respondWith(handleApiRequest(request));
     return;
   }

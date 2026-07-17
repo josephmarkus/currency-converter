@@ -150,7 +150,7 @@ npm run preview
 - **Frontend Framework**: [Solid.js](https://solidjs.com) - Reactive UI library
 - **Build Tool**: [Vite](https://vitejs.dev) - Fast development and build tool
 - **Styling**: [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
-- **API**: [Frankfurter](https://frankfurter.app) - Free currency exchange rates
+- **API**: [Frankfurter](https://frankfurter.dev) - Free currency exchange rates
 - **PWA**: Service Worker for offline functionality
 - **TypeScript**: Type safety and better developer experience
 
@@ -213,7 +213,7 @@ The app supports 30+ major world currencies including:
 
 ## 🌐 API Integration
 
-The app uses the [Frankfurter API](https://api.frankfurter.app) which provides:
+The app uses the [Frankfurter API](https://frankfurter.dev) which provides:
 
 - **Free Access**: No API key required
 - **Real-time Data**: Updated daily from the European Central Bank
@@ -222,7 +222,7 @@ The app uses the [Frankfurter API](https://api.frankfurter.app) which provides:
 
 ### API Endpoints Used
 
-- `GET /latest?from={currency}` - Get latest exchange rates for a base currency
+- `GET https://api.frankfurter.dev/v1/latest?from={currency}` - Get latest exchange rates for a base currency
 
 ## 🔄 Service Worker
 
@@ -258,7 +258,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 🙏 Acknowledgments
 
-- [Frankfurter API](https://frankfurter.app) for providing free exchange rate data
+- [Frankfurter API](https://frankfurter.dev) for providing free exchange rate data
 - [Solid.js](https://solidjs.com) for the reactive framework
 - [Tailwind CSS](https://tailwindcss.com) for the styling system
 - [Vite](https://vitejs.dev) for the build tool

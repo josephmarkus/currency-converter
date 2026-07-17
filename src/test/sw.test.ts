@@ -16,7 +16,7 @@ import { http, HttpResponse } from "msw";
 import { server } from "./server";
 import { frankfurterError } from "./handlers/frankfurterApi";
 
-const FRANKFURTER_RATES_URL = "https://api.frankfurter.app/latest";
+const FRANKFURTER_RATES_URL = "https://api.frankfurter.dev/v1/latest";
 
 // ---------------------------------------------------------------------------
 // Stub factory helpers
